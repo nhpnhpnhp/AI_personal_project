@@ -1,4 +1,5 @@
 import pygame
+import time
 import sys
 import heapq
 from collections import deque
@@ -60,18 +61,6 @@ class HeuristicSolver(PuzzleSolver):
 #endregion
 
 #region [Các thuật toán cụ thể]
-
-import random
-from copy import deepcopy
-from heapq import nsmallest
-
-import random
-from copy import deepcopy
-from heapq import nsmallest
-from collections import defaultdict
-
-import random
-from copy import deepcopy
 
 class GeneticSolver(HeuristicSolver):
     def __init__(self, population_size=100, generations=500, mutation_rate=0.1):
@@ -226,13 +215,7 @@ class AStarSolver(HeuristicSolver):
 
 class IDDFSSolver(PuzzleSolver):
     def solve(self, start, goal, max_depth=30):
-        """
-        Phiên bản cải tiến của IDDFS với:
-        1. Theo dõi các trạng thái đã xét để tránh lặp
-        2. Tối ưu bộ nhớ bằng cách sử dụng tuple cho visited set
-        3. Kiểm tra goal state ngay khi tìm thấy
-        4. Hỗ trợ tìm kiếm theo chiều sâu tăng dần hiệu quả
-        """
+ 
         for depth in range(max_depth + 1):  # Bao gồm cả max_depth
             result = self._depth_limited_dfs(start, goal, depth)
             if result is not None:
@@ -271,7 +254,6 @@ class IDDFSSolver(PuzzleSolver):
         return None
 
     def _state_to_tuple(self, state):
-        """Chuyển state sang dạng tuple có thể hash được"""
         return tuple(tuple(row) for row in state)
 class GreedySolver(HeuristicSolver):
     def solve(self, start, goal):
@@ -365,13 +347,6 @@ from copy import deepcopy
 
 class SimulatedAnnealingSolver(HeuristicSolver):
     def solve(self, start, goal, initial_temp=1000, cooling_rate=0.995, max_steps=10000):
-        """
-        Improved Simulated Annealing implementation with:
-        1. Better memory management (limited visited states tracking)
-        2. Smarter stopping criteria
-        3. Adaptive neighbor selection
-        4. Path reconstruction optimization
-        """
         current_state = start
         best_state = start
         best_h = self.heuristic(start)
@@ -456,7 +431,7 @@ class SimulatedAnnealingSolver(HeuristicSolver):
         return None
 
     def _get_all_neighbors(self, state):
-        """Generate all possible next states from current state"""
+
         blank_i, blank_j = find_blank(state)
         neighbors = []
         
@@ -468,11 +443,9 @@ class SimulatedAnnealingSolver(HeuristicSolver):
         return neighbors
 
     def _state_to_tuple(self, state):
-        """Convert state to hashable tuple"""
         return tuple(tuple(row) for row in state)
 
     def _reconstruct_path(self, sparse_path, start, end):
-        """Reconstruct complete path from sparse state storage"""
         if not sparse_path:
             return [start]
         
@@ -487,7 +460,6 @@ class SimulatedAnnealingSolver(HeuristicSolver):
         return sparse_path + path_to_end[1:]
 
     def _build_path_between(self, start, end):
-        """Build path between two states using simple BFS"""
         if start == end:
             return [start]
         
@@ -511,7 +483,6 @@ class SimulatedAnnealingSolver(HeuristicSolver):
         return None
 
     def _complete_with_greedy(self, state, goal):
-        """Complete the path to goal using greedy best-first search"""
         current = state
         path = [current]
         visited = set()
@@ -609,12 +580,6 @@ from math import exp
 
 class StochasticHillClimbingSolver(HeuristicSolver):
     def solve(self, start, goal, max_steps=1000, temperature=1.0, cooling_rate=0.99):
-        """
-        Phiên bản cải tiến của Stochastic Hill Climbing với:
-        - Simulated Annealing (giảm nhiệt độ dần)
-        - Theo dõi các trạng thái đã xét
-        - Random restart khi bị kẹt
-        """
         current = start
         best_state = current
         best_h = self.heuristic(current)
@@ -656,7 +621,6 @@ class StochasticHillClimbingSolver(HeuristicSolver):
         return None if best_h > 0 else path  # Trả về kết quả nếu tìm thấy goal
 
     def _get_unvisited_neighbors(self, state, visited):
-        """Tạo danh sách các trạng thái kề chưa được xét"""
         neighbors = []
         blank = find_blank(state)
         
@@ -671,11 +635,7 @@ class StochasticHillClimbingSolver(HeuristicSolver):
         return neighbors
 
     def _select_next_state(self, current, neighbors, temperature):
-        """
-        Chọn trạng thái tiếp theo với xác suất phụ thuộc vào:
-        - Độ chênh lệch heuristic
-        - Nhiệt độ hiện tại
-        """
+
         current_h = self.heuristic(current)
         candidates = []
         
@@ -696,7 +656,6 @@ class StochasticHillClimbingSolver(HeuristicSolver):
         return next_state
 
     def _random_restart(self, state, steps=20):
-        """Tạo trạng thái ngẫu nhiên bằng cách thực hiện nhiều bước di chuyển ngẫu nhiên"""
         current = [row[:] for row in state]
         for _ in range(steps):
             blank = find_blank(current)
@@ -713,7 +672,6 @@ class StochasticHillClimbingSolver(HeuristicSolver):
         return current
 
     def _state_to_tuple(self, state):
-        """Chuyển state sang dạng tuple có thể hash được"""
         return tuple(tuple(row) for row in state)
 class IDAStarSolver(HeuristicSolver):
     def solve(self, start, goal):
@@ -760,13 +718,7 @@ from copy import deepcopy
 
 class SteepestHillClimbingSolver(HeuristicSolver):
     def solve(self, start, goal, max_attempts=100):
-        """
-        Phiên bản cải tiến của Steepest Ascent Hill Climbing với:
-        1. Theo dõi các trạng thái đã xét
-        2. Hỗ trợ random restart khi bị kẹt
-        3. Quản lý bộ nhớ hiệu quả
-        4. Tối ưu hóa tìm kiếm láng giềng
-        """
+
         current = deepcopy(start)
         path = [deepcopy(current)]
         visited = set([self._state_to_tuple(current)])
@@ -798,7 +750,6 @@ class SteepestHillClimbingSolver(HeuristicSolver):
         return path if self._state_to_tuple(current) == self._state_to_tuple(goal) else None
 
     def _get_unvisited_neighbors(self, state, visited):
-        """Tạo danh sách các trạng thái kề chưa được xét"""
         neighbors = []
         blank = find_blank(state)
         
@@ -813,7 +764,6 @@ class SteepestHillClimbingSolver(HeuristicSolver):
         return neighbors
 
     def _find_best_neighbor(self, neighbors):
-        """Tìm trạng thái láng giềng tốt nhất"""
         best_h = float('inf')
         best_neighbor = None
         
@@ -826,7 +776,6 @@ class SteepestHillClimbingSolver(HeuristicSolver):
         return best_neighbor, best_h
 
     def _state_to_tuple(self, state):
-        """Chuyển state sang dạng tuple có thể hash được"""
         return tuple(tuple(row) for row in state)
 import heapq
 import random
@@ -835,25 +784,11 @@ from copy import deepcopy
 
 class NondeterministicSolver(PuzzleSolver):
     def __init__(self, success_prob=0.8):
-        """
-        Solver that accounts for non-deterministic actions with success probability
-        
-        Args:
-            success_prob: Probability that the intended move succeeds (default 0.8)
-        """
+
         self.success_prob = success_prob
 
     def solve(self, start, goal):
-        """
-        Solves the puzzle using probabilistic actions
-        
-        Args:
-            start: Initial puzzle state
-            goal: Target puzzle state
-            
-        Returns:
-            Solution path if found, None otherwise
-        """
+
         # Convert to tuple for hashable states
         start_tuple = tuple(tuple(row) for row in start)
         goal_tuple = tuple(tuple(row) for row in goal)
@@ -888,15 +823,7 @@ class NondeterministicSolver(PuzzleSolver):
         return None
 
     def get_neighbors(self, state):
-        """
-        Get possible next states with their probabilities
-        
-        Args:
-            state: Current puzzle state
-            
-        Returns:
-            List of (next_state, probability) tuples
-        """
+
         blank = self.find_blank(state)
         if blank is None:
             return []
@@ -923,7 +850,6 @@ class NondeterministicSolver(PuzzleSolver):
         return neighbors
 
     def expected_heuristic(self, state, goal):
-        """Expected Manhattan distance heuristic"""
         distance = 0
         for i in range(len(state)):
             for j in range(len(state[0])):
@@ -934,7 +860,6 @@ class NondeterministicSolver(PuzzleSolver):
         return distance
 
     def find_blank(self, state):
-        """Find blank position (0)"""
         for i in range(len(state)):
             for j in range(len(state[0])):
                 if state[i][j] == 0:
@@ -942,7 +867,6 @@ class NondeterministicSolver(PuzzleSolver):
         return None
 
     def find_position(self, state, value):
-        """Find position of a value in the state"""
         for i in range(len(state)):
             for j in range(len(state[0])):
                 if state[i][j] == value:
@@ -950,19 +874,10 @@ class NondeterministicSolver(PuzzleSolver):
         return (-1, -1)
 
     def swap_tiles(self, state, i1, j1, i2, j2):
-        """Swap two tiles and return new state"""
         state = [list(row) for row in state]  # Convert to list
         new_state = [row[:] for row in state]
         new_state[i1][j1], new_state[i2][j2] = new_state[i2][j2], new_state[i1][j1]
         return tuple(tuple(row) for row in new_state)
-from collections import deque
-from copy import deepcopy
-
-import random
-from typing import List, Tuple, Dict, Set, Optional
-
-from collections import deque
-import random
 
 class PartialObservationSolver(PuzzleSolver):
     def __init__(self, visible_radius=1, num_hidden=3):
@@ -1020,7 +935,6 @@ class PartialObservationSolver(PuzzleSolver):
         return None
 
     def visible_matches(self, state, goal):
-        """Check if all visible tiles match the goal"""
         # Handle case where state is a tuple
         if isinstance(state, tuple):
             state = [list(row) for row in state]
@@ -1044,7 +958,6 @@ class PartialObservationSolver(PuzzleSolver):
         return True
 
     def find_blank(self, state):
-        """Find the position of the blank tile (0)"""
         # Handle case where state is a tuple
         if isinstance(state, tuple):
             state = [list(row) for row in state]
@@ -1215,11 +1128,6 @@ class QLearningSolver(PuzzleSolver):
             state = next_state
         return path
 #region [Giao diện người dùng]
-import pygame
-import sys
-import random
-import time
-from collections import deque
 class Button:
     def __init__(self, text, pos, action, color):
         self.text = text
