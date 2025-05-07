@@ -5,7 +5,6 @@ from collections import deque
 import math
 import random
 from enum import Enum
-
 #region [Cấu hình và hằng số]
 WIDTH, HEIGHT = 800, 750
 GRID_SIZE = 3
@@ -36,7 +35,6 @@ COLORS = {
     }
 }
 
-start_state = ((2, 6, 5), (8, 0, 7), (4, 3, 1))
 goal_state = ((1, 2, 3), (4, 5, 6), (7, 8, 0))
 directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
 #endregion
@@ -75,181 +73,116 @@ from collections import defaultdict
 import random
 from copy import deepcopy
 
-class GeneticSolver(PuzzleSolver):
-    def __init__(self, population_size=100, max_generations=100, mutation_rate=0.2, crossover_rate=0.7, tournament_size=5):
+class GeneticSolver(HeuristicSolver):
+    def __init__(self, population_size=100, generations=500, mutation_rate=0.1):
         self.population_size = population_size
-        self.max_generations = max_generations
+        self.generations = generations
         self.mutation_rate = mutation_rate
-        self.crossover_rate = crossover_rate
-        self.tournament_size = tournament_size
-        
+
     def solve(self, start, goal):
-        # Initialize population with random moves from start state
-        population = [self.generate_individual(start) for _ in range(self.population_size)]
-        
-        for generation in range(self.max_generations):
-            # Evaluate fitness
-            fitness_scores = [self.evaluate_fitness(individual, goal) for individual in population]
+        """Giải bài toán 8-puzzle bằng thuật toán di truyền (Genetic Algorithm)"""
+
+        def get_neighbors(state):
+            """Lấy các trạng thái hợp lệ từ trạng thái hiện tại"""
+            for i in range(3):
+                for j in range(3):
+                    if state[i][j] == 0:
+                        x, y = i, j
+                        break
+
+            moves = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # Các hướng di chuyển: lên, xuống, trái, phải
+            neighbors = []
+            for dx, dy in moves:
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < 3 and 0 <= ny < 3:
+                    new_state = [list(row) for row in state]
+                    new_state[x][y], new_state[nx][ny] = new_state[nx][ny], new_state[x][y]
+                    neighbors.append(tuple(tuple(row) for row in new_state))
+            return neighbors
+
+        def generate_state_from_start(start, steps=10):
+            """Khởi tạo một trạng thái hợp lệ từ start, thực hiện các bước di chuyển hợp lệ"""
+            current = start
+            path = [start]
+            for _ in range(steps):
+                neighbors = get_neighbors(current)
+                next_state = random.choice(neighbors)  # Chọn ngẫu nhiên 1 trạng thái hợp lệ
+                path.append(next_state)
+                current = next_state
+            return current, path
+
+        def fitness(state):
+            """Đánh giá độ tốt của trạng thái (sử dụng heuristic)"""
+            return -self.heuristic(state)
+
+        def crossover(parent1, parent2):
+            """Lai ghép hai trạng thái (giữ tính hợp lệ)"""
+            def flatten(t): return [x for row in t for x in row]
             
-            # Check if we've found a solution
-            best_fitness = min(fitness_scores)
-            if best_fitness == 0:
-                best_index = fitness_scores.index(best_fitness)
-                solution_path = self.extract_solution_path(population[best_index], start)
-                if solution_path:
-                    return solution_path
+            p1_flat = flatten(parent1[0])
+            p2_flat = flatten(parent2[0])
+
+            child = [-1] * 9
+            used = set()
             
-            # Create new generation
-            new_population = []
+            cut = random.randint(0, 8)
+            for i in range(cut):
+                child[i] = p1_flat[i]
+                used.add(p1_flat[i])
+
+            idx = cut
+            for val in p2_flat:
+                if val not in used:
+                    child[idx] = val
+                    idx += 1
+
+            new_state = tuple(tuple(child[i*3:(i+1)*3]) for i in range(3))
+            return (new_state, parent1[1] + [new_state])
+
+        def mutate(state, path):
+            """Đột biến hợp lệ (hoán đổi 2 ô hợp lệ)"""
+            for i in range(3):
+                for j in range(3):
+                    if state[i][j] == 0:
+                        x, y = i, j
+                        break
+
+            neighbors = get_neighbors(state)
+            new_state = random.choice(neighbors)
+
+            return new_state, path + [new_state]
+
+        def valid_state(state):
+            """Kiểm tra trạng thái có hợp lệ không"""
+            return state in get_neighbors(state)
+
+        # Khởi tạo quần thể từ start qua các bước di chuyển hợp lệ
+        population = [generate_state_from_start(start, steps=10) for _ in range(self.population_size)]
+
+        for generation in range(self.generations):
+            # Sắp xếp quần thể theo fitness (từ tốt đến xấu)
+            population.sort(key=lambda x: fitness(x[0]), reverse=True)
+
+            # Kiểm tra xem đã tìm được giải pháp chưa
+            if population[0][0] == goal:
+                return population[0][1]  # Trả về path
+
+            # Chọn lọc các cá thể tốt nhất
+            selected = population[:self.population_size // 5]
+            new_population = selected[:]
+
+            # Lai ghép và đột biến để tạo thế hệ mới
             while len(new_population) < self.population_size:
-                # Selection
-                parent1 = self.tournament_selection(population, fitness_scores)
-                parent2 = self.tournament_selection(population, fitness_scores)
-                
-                # Crossover
-                if random.random() < self.crossover_rate:
-                    child1, child2 = self.crossover(parent1, parent2)
-                else:
-                    child1, child2 = parent1.copy(), parent2.copy()
-                
-                # Mutation
+                p1, p2 = random.sample(selected, 2)
+                child = crossover(p1, p2)
                 if random.random() < self.mutation_rate:
-                    child1 = self.mutate(child1)
-                if random.random() < self.mutation_rate:
-                    child2 = self.mutate(child2)
-                
-                new_population.extend([child1, child2])
-            
-            population = new_population[:self.population_size]
-        
-        # Return best solution found (if any)
-        fitness_scores = [self.evaluate_fitness(individual, goal) for individual in population]
-        best_index = fitness_scores.index(min(fitness_scores))
-        solution_path = self.extract_solution_path(population[best_index], start)
-        return solution_path if solution_path else None
-    
-    def generate_individual(self, start_state):
-        """Generate an individual as a sequence of moves (up to 50 moves)"""
-        max_moves = 200
-        individual = []
-        current_state = start_state
-        
-        for _ in range(max_moves):
-            blank_i, blank_j = find_blank(current_state)
-            possible_moves = []
-            
-            for di, dj in directions:
-                new_i, new_j = blank_i + di, blank_j + dj
-                if 0 <= new_i < GRID_SIZE and 0 <= new_j < GRID_SIZE:
-                    possible_moves.append((di, dj))
-            
-            if not possible_moves:
-                break
-                
-            move = random.choice(possible_moves)
-            individual.append(move)
-            current_state = swap_tiles(current_state, blank_i, blank_j, blank_i + move[0], blank_j + move[1])
-            
-        return individual
-    
-    def evaluate_fitness(self, individual, goal_state):
-        """Calculate fitness by simulating the moves and checking distance to goal"""
-        current_state = start_state
-        
-        for move in individual:
-            blank_i, blank_j = find_blank(current_state)
-            new_i, new_j = blank_i + move[0], blank_j + move[1]
-            
-            if 0 <= new_i < GRID_SIZE and 0 <= new_j < GRID_SIZE:
-                current_state = swap_tiles(current_state, blank_i, blank_j, new_i, new_j)
-            else:
-                # Penalize invalid moves
-                return float('inf')
-        
-        # Use Manhattan distance heuristic
-        distance = 0
-        for i in range(GRID_SIZE):
-            for j in range(GRID_SIZE):
-                value = current_state[i][j]
-                if value != 0:
-                    goal_row = (value - 1) // GRID_SIZE
-                    goal_col = (value - 1) % GRID_SIZE
-                    distance += abs(i - goal_row) + abs(j - goal_col)
-        
-        # Also consider path length to prefer shorter solutions
-        return distance + len(individual) * 0.1
-    
-    def tournament_selection(self, population, fitness_scores):
-        """Select an individual using tournament selection"""
-        tournament = random.sample(list(zip(population, fitness_scores)), self.tournament_size)
-        tournament.sort(key=lambda x: x[1])  # Sort by fitness
-        return tournament[0][0]  # Return the best in the tournament
-    
-    def crossover(self, parent1, parent2):
-        """Perform ordered crossover between two parents"""
-        if len(parent1) < 2 or len(parent2) < 2:
-            return parent1.copy(), parent2.copy()
-            
-        # Select crossover points
-        point1 = random.randint(0, min(len(parent1), len(parent2)) - 1)
-        point2 = random.randint(point1 + 1, min(len(parent1), len(parent2)))
-        
-        # Create children
-        child1 = parent1[:point1] + parent2[point1:point2] + parent1[point2:]
-        child2 = parent2[:point1] + parent1[point1:point2] + parent2[point2:]
-        
-        return child1, child2
-    
-    def mutate(self, individual):
-        """Mutate an individual by changing some moves"""
-        if not individual:
-            return individual
-            
-        mutated = individual.copy()
-        for i in range(len(mutated)):
-            if random.random() < 0.1:  # Chance to mutate each move
-                blank_i, blank_j = find_blank(self.simulate_moves(start_state, mutated[:i]))
-                possible_moves = []
-                
-                for di, dj in directions:
-                    new_i, new_j = blank_i + di, blank_j + dj
-                    if 0 <= new_i < GRID_SIZE and 0 <= new_j < GRID_SIZE:
-                        possible_moves.append((di, dj))
-                
-                if possible_moves:
-                    mutated[i] = random.choice(possible_moves)
-        
-        return mutated
-    
-    def simulate_moves(self, start_state, moves):
-        """Simulate a sequence of moves from a starting state"""
-        current_state = start_state
-        for move in moves:
-            blank_i, blank_j = find_blank(current_state)
-            new_i, new_j = blank_i + move[0], blank_j + move[1]
-            if 0 <= new_i < GRID_SIZE and 0 <= new_j < GRID_SIZE:
-                current_state = swap_tiles(current_state, blank_i, blank_j, new_i, new_j)
-        return current_state
-    
-    def extract_solution_path(self, individual, start_state):
-        """Convert an individual to a valid solution path"""
-        path = [start_state]
-        current_state = start_state
-        
-        for move in individual:
-            blank_i, blank_j = find_blank(current_state)
-            new_i, new_j = blank_i + move[0], blank_j + move[1]
-            
-            if 0 <= new_i < GRID_SIZE and 0 <= new_j < GRID_SIZE:
-                current_state = swap_tiles(current_state, blank_i, blank_j, new_i, new_j)
-                path.append(current_state)
-            else:
-                return None  # Invalid move sequence
-            
-            if current_state == goal_state:
-                return path
-        
-        return None if current_state != goal_state else path
+                    child = mutate(child[0], child[1])
+                new_population.append(child)
+
+            population = new_population  # Cập nhật quần thể
+
+        return None  # Nếu không tìm thấy lời giải sau các thế hệ
+
 class BFSSolver(PuzzleSolver):
     def solve(self, start, goal):
         queue = deque([(start, [])])
@@ -1121,7 +1054,172 @@ class PartialObservationSolver(PuzzleSolver):
                 if state[i][j] == 0:
                     return (i, j)
         return None
+class BeliefStateSolver(PuzzleSolver):
+    def solve(self, start, goal):
+        initial_belief = frozenset([start])
+        goal_state = goal
+        queue = deque([(initial_belief, [])])
+        visited = set()
+        visited.add(initial_belief)
+        actions = directions  # Các hướng di chuyển
+
+        while queue:
+            current_belief, path = queue.popleft()
+            
+            # Kiểm tra tất cả trạng thái đều là goal
+            if all(state == goal_state for state in current_belief):
+                return path  # Trả về chuỗi hành động
+            
+            for action in actions:
+                next_belief = set()
+                for state in current_belief:
+                    i, j = find_blank(state)
+                    di, dj = action
+                    new_i, new_j = i + di, j + dj
+                    
+                    if 0 <= new_i < GRID_SIZE and 0 <= new_j < GRID_SIZE:
+                        new_state = swap_tiles(state, i, j, new_i, new_j)
+                    else:
+                        new_state = state  # Giữ nguyên nếu không di chuyển được
+                    next_belief.add(new_state)
+                
+                next_belief_frozen = frozenset(next_belief)
+                if next_belief_frozen not in visited:
+                    visited.add(next_belief_frozen)
+                    queue.append((next_belief_frozen, path + [action]))
+        
+        return None  # Không tìm thấy giải pháp
+class NoObservationSolver(PuzzleSolver):
+    def __init__(self, max_states=1):  # Giảm max_states xuống 20
+        self.max_states = max_states
+        self.visited = set()
+
+    def is_solvable(self, state):
+        flat = [tile for row in state for tile in row if tile != 0]
+        inv_count = sum(1 for i in range(len(flat)) for j in range(i+1, len(flat)) if flat[i] > flat[j])
+        return inv_count % 2 == 0
+
+    def generate_random_belief_states(self):
+        from itertools import permutations
+        import random
+
+        perms = list(permutations(range(9)))
+        random.shuffle(perms)
+
+        states = set()
+        for perm in perms:
+            matrix = tuple(tuple(perm[i*3:(i+1)*3]) for i in range(3))
+            if self.is_solvable(matrix):
+                states.add(matrix)
+                if len(states) >= self.max_states:
+                    break
+        return list(states)
+
+    def apply_action(self, state, direction):
+        i, j = find_blank(state)
+        ni, nj = i + direction[0], j + direction[1]
+        if 0 <= ni < GRID_SIZE and 0 <= nj < GRID_SIZE:
+            return swap_tiles(state, i, j, ni, nj)
+        return state
+
+    def solve(self, start, goal):
+        belief = self.generate_random_belief_states()
+        if not belief:
+            print("Không thể tạo đủ belief states hợp lệ.")
+            return None
+
+        queue = deque()
+        queue.append((belief, []))
+
+        while queue:
+            belief, actions = queue.popleft()
+
+            if all(state == goal for state in belief):
+                return [goal]
+
+            for direction in directions:
+                next_belief = set()
+                for state in belief:
+                    next_state = self.apply_action(state, direction)
+                    next_belief.add(next_state)
+
+                if len(next_belief) > self.max_states:
+                    continue
+
+                key = frozenset(next_belief)
+                if key in self.visited:
+                    continue
+                self.visited.add(key)
+
+                queue.append((list(next_belief), actions + [direction]))
+
+        print("Không tìm thấy lời giải trong giới hạn.")
+        return None
+class QLearningSolver(PuzzleSolver):
+    def __init__(self, alpha=0.8, gamma=0.9, epsilon=0.1, episodes=2000):
+        self.alpha = alpha  # Learning rate
+        self.gamma = gamma  # Discount factor
+        self.epsilon = epsilon  # Exploration rate
+        self.episodes = episodes  # Number of episodes to run Q-learning
+        self.q_table = {}  # Dictionary to store Q-values
+        
+    def get_actions(self, state):
+        # Trả về tất cả các hành động có thể từ trạng thái hiện tại (di chuyển các ô)
+        actions = []
+        blank_row, blank_col = find_blank(state)
+        for direction in directions:
+            new_row, new_col = blank_row + direction[0], blank_col + direction[1]
+            if 0 <= new_row < GRID_SIZE and 0 <= new_col < GRID_SIZE:
+                actions.append((blank_row, blank_col, new_row, new_col))
+        return actions
+
+    def update_q_table(self, state, action, reward, next_state):
+        # Cập nhật bảng Q theo công thức Q-learning
+        max_q_next = max(self.q_table.get(next_state, {}).values(), default=0)
+        current_q = self.q_table.get(state, {}).get(action, 0)
+        self.q_table.setdefault(state, {})[action] = current_q + self.alpha * (reward + self.gamma * max_q_next - current_q)
+
+    def choose_action(self, state):
+        # Lựa chọn hành động theo chiến lược epsilon-greedy
+        if random.random() < self.epsilon:
+            # Khám phá (explore)
+            actions = self.get_actions(state)
+            return random.choice(actions)
+        else:
+            # Tận dụng (exploit)
+            if state not in self.q_table:
+                return random.choice(self.get_actions(state))
+            max_q_action = max(self.q_table[state], key=self.q_table[state].get)
+            return max_q_action
+    
+    def solve(self, start, goal):
+        for episode in range(self.episodes):
+            state = start
+            total_reward = 0
+            while state != goal:
+                action = self.choose_action(state)
+                next_state = swap_tiles(state, *action)
+                reward = -1 if next_state != goal else 100  # Phần thưởng tiêu cực khi không phải trạng thái mục tiêu
+                self.update_q_table(state, action, reward, next_state)
+                state = next_state
+                total_reward += reward
+            print(f"Episode {episode + 1}: Total Reward: {total_reward}")
+        
+        # Trả về chuỗi hành động tối ưu từ trạng thái ban đầu
+        state = start
+        path = [state]
+        while state != goal:
+            action = self.choose_action(state)
+            next_state = swap_tiles(state, *action)
+            path.append(next_state)
+            state = next_state
+        return path
 #region [Giao diện người dùng]
+import pygame
+import sys
+import random
+import time
+from collections import deque
 class Button:
     def __init__(self, text, pos, action, color):
         self.text = text
@@ -1160,46 +1258,57 @@ class PuzzleUI:
             "IDDFS": IDDFSSolver(),
             "Nondeterministic": NondeterministicSolver(),  
             "PartialObservation": PartialObservationSolver(),
+            "NoObservation": NoObservationSolver(),
+            "Q-Learning": QLearningSolver(),
+
         }
         
         self.buttons = self.create_buttons()
         self.path = deque()
         self.current_step = 0
-        self.end_state = start_state
+        self.start_state = ((2, 6, 5), (8, 0, 7), (4, 3, 1))  # Trạng thái ban đầu cũ
+        self.end_state = self.start_state
+        self.steps_display = None  # Hiển thị số bước
+        self.time_display = None  # Hiển thị thời gian
 
     def create_buttons(self):
         return [
+              # Nút tạo trạng thái mới
+
             # Hàng 1
-            Button("BFS", (10, 500), "BFS", COLORS["button"]["BFS"]),
-            Button("DFS", (BUTTON_SIZE+20, 500), "DFS", COLORS["button"]["default"]),
-            Button("UCS", (2*BUTTON_SIZE+30, 500), "UCS", COLORS["button"]["UCS"]),
-            Button("IDDFS", (3*BUTTON_SIZE+40, 500), "IDDFS", COLORS["button"]["IDDFS"]),
-            Button("Genetic", (5*BUTTON_SIZE+60, 500), "Genetic", COLORS["button"]["Genetic"]),
+            Button("BFS", (10, 500), "BFS",(241, 76, 76)),
+            Button("DFS", (BUTTON_SIZE+20, 500), "DFS",(241, 76, 76)),
+            Button("UCS", (2*BUTTON_SIZE+30, 500), "UCS",(241, 76, 76)),
+            Button("IDDFS", (3*BUTTON_SIZE+40, 500), "IDDFS", (241, 76, 76)),
             # Hàng 2
-            Button("IDA*", (10, 560), "IDA*", COLORS["button"]["IDA*"]),
-            Button("A*", (BUTTON_SIZE+20, 560), "A*", COLORS["button"]["A*"]),
-            Button("Greedy", (2*BUTTON_SIZE+30, 560), "Greedy", COLORS["button"]["Greedy"]),
-            Button("Beam", (3*BUTTON_SIZE+40, 560), "Beam", COLORS["button"]["Beam"]),
-            
+            Button("IDA*", (10, 560), "IDA*", (0, 255, 127)),
+            Button("A*", (BUTTON_SIZE+20, 560), "A*", (0, 255, 127)),
+            Button("Greedy", (2*BUTTON_SIZE+30, 560), "Greedy", (0, 255, 127)),
+            Button("Beam", (3*BUTTON_SIZE+40, 560), "Beam", (0, 255, 127)),
+            Button("Genetic", (4*BUTTON_SIZE+60, 560), "Genetic", (0, 255, 127)),
+
             # Hàng 3
             Button("STOCH", (10, 620), "STOCH", (200, 120, 200)),
-            Button("STEEPH", (BUTTON_SIZE+20, 620), "STEEPH", COLORS["button"]["Steepest"]),
+            Button("STEEPH", (BUTTON_SIZE+20, 620), "STEEPH", (200, 120, 200)),
+            Button("SA", (2*BUTTON_SIZE+30, 620), "SA", (200, 120, 200)),
+            Button("SIMPLE", (3*BUTTON_SIZE+40, 620), "SIMPLE", (200, 120, 200)),
 
-            Button("SA", (2*BUTTON_SIZE+30, 620), "SA", COLORS["button"]["SA"]),
-            Button("SIMPLE", (3*BUTTON_SIZE+40, 620), "SIMPLE", COLORS["button"]["Hill"]),
 
             # Hàng 4
-            Button("IDDFS", (10, 680), "IDDFS", COLORS["button"]["IDDFS"]),
-            Button("SWNA", (BUTTON_SIZE+20, 680), "Nondeterministic", COLORS["button"]["Greedy"]),
-            Button("PO", (2*BUTTON_SIZE+30, 680), "PartialObservation", COLORS["button"]["Hill"]),
+            Button("NO OBS", (10, 680), "NoObservation", (110, 15, 10)),
+            Button("SWNA", (BUTTON_SIZE+20, 680), "Nondeterministic",(110, 15, 10)),
+            Button("PO", (2*BUTTON_SIZE+30, 680), "PartialObservation", (110, 15, 10)),
+            Button("Q-LEARN", (3*BUTTON_SIZE+40, 680), "Q-Learning", (255, 153, 0)),
+            Button("New w/ CSP", (4*BUTTON_SIZE+50, 680), "GENERATE_START_STATE", (0, 0, 102)),
+            
         ]
-    def draw_grid(self, state):
+    def draw_grid(self, state, position=(0, 0)):
         font = pygame.font.Font(None, FONT_SIZE)
         for i in range(GRID_SIZE):
             for j in range(GRID_SIZE):
                 value = state[i][j]
-                rect = pygame.Rect(j*TILE_SIZE, i*TILE_SIZE, TILE_SIZE, TILE_SIZE)
-                color = COLORS["tile"] if value !=0 else (200, 200, 200)
+                rect = pygame.Rect(position[0] + j * TILE_SIZE, position[1] + i * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+                color = COLORS["tile"] if value != 0 else (200, 200, 200)
                 pygame.draw.rect(self.screen, color, rect, border_radius=5)
                 if value != 0:
                     text = font.render(str(value), True, COLORS["text"])
@@ -1226,38 +1335,134 @@ class PuzzleUI:
         pygame.quit()
         sys.exit()
 
+    # Cập nhật UI để xử lý hành động
     def handle_click(self, pos):
         for btn in self.buttons:
             if btn.rect.collidepoint(pos):
-                self.end_state = start_state
-                self.path = None
-                self.current_step = 0
-                try:
-                    solver = self.algorithms.get(btn.action)                    
+                if btn.text == "New w/ CSP":
+                    self.start_state = generate_start_state_by_csp()
+                    self.end_state = self.start_state
+                    self.path = None
+                    self.current_step = 0
+                    self.steps_display = None
+                    self.time_display = None
+                    print(f"New start state: {self.start_state}")
+                else:
+                    self.end_state = self.start_state
+                    self.path = None
+                    self.current_step = 0
+                    self.steps_display = None
+                    self.time_display = None
+
+                    solver = self.algorithms.get(btn.action)
                     if solver:
-                        self.path = solver.solve(start_state, goal_state)
-                        if not self.path:
-                            print(f"{btn.action} không tìm thấy lời giải!")
-                        else :
-                            print(len(self.path) -1)
-                            self.end_state = goal_state
-                except Exception as e:
-                    print(f"Lỗi: {str(e)}")
-    
+                        start_time = time.time()
+                        try:
+                            self.path = solver.solve(self.start_state, goal_state)
+                            elapsed = round(time.time() - start_time, 2)
+                            self.time_display = elapsed
+
+                            if self.path:
+                                self.steps_display = len(self.path) - 1
+                                self.end_state = goal_state
+                            else:
+                                self.steps_display = "CAN'T SOLVE!"
+                                self.time_display = 0
+
+                        except Exception as e:
+                            self.steps_display = f"Lỗi: {str(e)}"
+                            self.time_display = 0
+
+
+
+
     def update_display(self):
         if self.path:
-            current_state = self.path.pop(0)  # Lấy và xóa state đầu tiên
+            current_state = self.path.pop(0)
             self.draw_grid(current_state)
             pygame.time.delay(STEP_DELAY)
-
         else:
             self.draw_grid(self.end_state)
 
+        # Goal State nhỏ
+        goal_label_font = pygame.font.Font(None, 28)
+        goal_label = goal_label_font.render("Goal", True, COLORS["text"])
+        self.screen.blit(goal_label, (WIDTH - 250, 20))
+        self.draw_mini_grid(goal_state, position=(WIDTH - 250, 50))
+
         for btn in self.buttons:
             btn.draw(self.screen)
+
+        font = pygame.font.Font(None, FONT_SIZE)
+        if self.steps_display is not None:
+            if isinstance(self.steps_display, int):
+                steps_text = font.render(f"Step: {self.steps_display}", True, COLORS["text"])
+            else:
+                steps_text = font.render(self.steps_display, True, COLORS["text"])
+            self.screen.blit(steps_text, (WIDTH - 250, 400))
+
+        if self.time_display is not None:
+            time_text = font.render(f"Time: {self.time_display}s", True, COLORS["text"])
+            self.screen.blit(time_text, (WIDTH - 250, 450))
+    def draw_mini_grid(self, state, position=(0, 0), tile_size=70):
+        font = pygame.font.Font(None, 24)
+        for i in range(GRID_SIZE):
+            for j in range(GRID_SIZE):
+                value = state[i][j]
+                rect = pygame.Rect(position[0] + j * tile_size, position[1] + i * tile_size, tile_size, tile_size)
+                color = COLORS["tile"] if value != 0 else (200, 200, 200)
+                pygame.draw.rect(self.screen, color, rect, border_radius=3)
+                if value != 0:
+                    text = font.render(str(value), True, COLORS["text"])
+                    text_rect = text.get_rect(center=rect.center)
+                    self.screen.blit(text, text_rect)
+
 #endregion
 
 #region [Các hàm tiện ích]
+def is_solvable(state_flat):
+    inversion_count = 0
+    for i in range(len(state_flat)):
+        for j in range(i + 1, len(state_flat)):
+            if state_flat[i] != 0 and state_flat[j] != 0 and state_flat[i] > state_flat[j]:
+                inversion_count += 1
+    return inversion_count % 2 == 0
+
+
+def generate_start_state_by_csp():
+    from itertools import permutations
+    values = list(range(9))
+    
+    # Thử các hoán vị ngẫu nhiên đến khi tìm được trạng thái hợp lệ
+    attempts = 0
+    while True:
+        attempts += 1
+        candidate = random.sample(values, 9)
+        if is_solvable(candidate):
+            grid = [tuple(candidate[i:i + 3]) for i in range(0, 9, 3)]
+            print(f"Generated after {attempts} attempts: {grid}")
+            return tuple(grid)
+        # Nếu không hợp lệ, tiếp tục thử
+        if attempts >= 100:  # Giới hạn số lần thử để tránh vô hạn
+            print("Failed to generate a solvable state after 100 attempts.")
+            break
+def is_goal_state(state, goal_state):
+    """Kiểm tra nếu trạng thái là trạng thái mục tiêu."""
+    return state == goal_state
+
+def get_possible_actions(state):
+    """Lấy các hành động có thể thực hiện từ trạng thái hiện tại."""
+    actions = []
+    blank_row, blank_col = find_blank(state)
+    
+    # Di chuyển ô trống lên, xuống, trái, phải
+    directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+    for dr, dc in directions:
+        new_row, new_col = blank_row + dr, blank_col + dc
+        if 0 <= new_row < 3 and 0 <= new_col < 3:
+            actions.append((new_row, new_col))
+    return actions
+
 def find_blank(state):
     for i in range(GRID_SIZE):
         for j in range(GRID_SIZE):
