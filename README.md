@@ -663,9 +663,7 @@ Khác với các thuật toán Hill Climbing khác, SA cho phép thỉnh thoản
      - Nếu     ΔE>0 → chấp nhận (hàng xóm tốt hơn).
      - Nếu     ΔE≤0 → chấp nhận với xác suất 
     ΔE/T(cho phép bước lùi).
-    • Giảm nhiệt độ 
-    𝑇
-    T theo lịch làm nguội (cooling schedule).
+    • Giảm nhiệt độ T theo lịch làm nguội (cooling schedule).
     • Nếu đạt đích → trả về lời giải.
     
     Kết thúc
@@ -685,3 +683,99 @@ Khác với các thuật toán Hill Climbing khác, SA cho phép thỉnh thoản
     Cần thiết lập lịch làm nguội phù hợp (quá nhanh → kẹt, quá chậm → tốn thời gian).
     Không đảm bảo tìm lời giải tối ưu.
     Dễ bị kém ổn định nếu hàm đánh giá không trơn tru.
+
+Q-Learning – Học tăng cường không mô hình
+![Qlearn](https://github.com/user-attachments/assets/1e1412e0-adba-42af-90ed-0569d8287d4f)
+
+Q-Learning là một thuật toán học tăng cường (Reinforcement Learning) giúp agent học chính sách tối ưu thông qua trải nghiệm, mà không cần biết trước mô hình môi trường (tức là không cần biết chính xác các xác suất chuyển trạng thái). Thay vì tìm kiếm đơn thuần như A* hay Hill Climbing, Q-Learning học dần giá trị của các hành động thông qua thử nghiệm và cập nhật.
+    
+    Các thành phần trong bài toán 8-Puzzle
+    Trạng thái (State):
+    Ma trận 3x3 hiện tại của ô số.
+    
+    Hành động (Action):
+    Di chuyển ô trống theo trái, phải, lên, xuống.
+    
+    Hàm phần thưởng (Reward):
+    • Thường:
+    −1 mỗi bước di chuyển → khuyến khích tìm đường ngắn nhất.
+    +100 khi đạt trạng thái đích.
+    
+    Q-Table:
+    Bảng lưu 
+    Q(s,a) = giá trị kỳ vọng của việc thực hiện hành động a tại trạng thái s.
+    
+    Hoạt động của thuật toán Q-Learning
+    Khởi tạo
+    
+    Q-table: tất cả giá trị ban đầu = 0.
+    Chọn tham số: tốc độ học α, hệ số chiết khấu γ, chiến lược chọn hành động (ví dụ: ϵ-greedy).
+    
+    Lặp lại cho mỗi episode
+    • Chọn trạng thái ban đầu.
+    • Trong mỗi bước:
+     – Chọn hành động a dựa trên Q(s,a) (ϵ-greedy: chủ yếu chọn tốt nhất, đôi khi chọn ngẫu nhiên để khám phá).
+     – Thực hiện a, nhận trạng thái mới s′và phần thưởng r.
+     – Cập nhật Q-value:    Q(s,a)←Q(s,a)+α[r+γmax)−Q(s,a)]
+     – Cập nhật trạng thái s=s′
+    
+    • Nếu đạt mục tiêu hoặc hết bước → kết thúc episode.
+    
+    Sau nhiều episode
+    Q-table hội tụ gần chính sách tối ưu. Có thể dùng để tìm đường đi tốt nhất từ bất kỳ trạng thái nào.
+    
+    Solution
+    Trả về chính sách tối ưu (tập hành động tốt nhất tại mỗi trạng thái) hoặc một chuỗi hành động cụ thể từ trạng thái ban đầu đến đích.
+    
+    Hiệu suất
+    Ưu điểm:
+    Không cần biết trước mô hình môi trường.
+    Có thể áp dụng cho bài toán không gian lớn (với các biến thể như Deep Q-Network – DQN).
+    Học được chính sách tối ưu thông qua trải nghiệm.
+    
+    Nhược điểm:
+    Với không gian trạng thái quá lớn (như 8-puzzle: 9! ≈ 362,880 trạng thái), Q-table trở nên cồng kềnh.
+    Cần nhiều episode để hội tụ.
+    Việc khám phá–khai thác (ϵ-greedy) cần điều chỉnh cẩn thận.
+
+CSP – Backtracking – Tìm kiếm giải pháp theo ràng buộc
+    ![csp](https://github.com/user-attachments/assets/b43b10d1-aa3f-4137-987a-d3659cba3e7a)
+
+
+Thuật toán CSP (Problem Satisfaction Problem) tìm kiếm giải pháp cho bài toán bằng cách sử dụng các ràng buộc và backtracking (quay lui). Trong CSP, ta có một tập các biến, mỗi biến có một miền giá trị có thể có, và mục tiêu là tìm một cách gán giá trị cho các biến sao cho tất cả các ràng buộc giữa các biến đều được thỏa mãn.
+    
+    Các thành phần của bài toán trong 8-Puzzle (CSP)
+    Biến: Mỗi ô trong ma trận 3x3 của 8-puzzle có thể được coi là một biến. Ví dụ: 𝑥1,𝑥2,...,𝑥9 tương ứng với các ô trong ma trận.
+    
+    Miền giá trị (Domain): Mỗi ô có thể chứa một giá trị trong miền {1, 2, 3, ..., 8, 0}, với 0 là ô trống.
+    
+    Ràng buộc (Constraints): Các ràng buộc này chỉ ra rằng các ô trong ma trận không thể chứa các giá trị trùng nhau, và các phép di chuyển ô trống phải tuân theo các hướng hợp lệ (trái, phải, lên, xuống).
+    
+    Mục tiêu: Tìm ra một cách gán giá trị cho các biến sao cho trạng thái ban đầu có thể dẫn đến trạng thái đích (ví dụ: 1–2–3 | 4–5–6 | 7–8–0).
+    
+    Hoạt động của thuật toán CSP – Backtracking
+    Khởi tạo
+    Bắt đầu với một trạng thái ban đầu cho bài toán, trong đó các ô trống được gán giá trị ngẫu nhiên hoặc từ một trạng thái cho sẵn.
+    
+    Lặp lại
+    • Chọn một biến: Chọn một ô (biến) chưa có giá trị hợp lệ.
+    • Giải quyết ràng buộc: Với mỗi giá trị trong miền của ô đó, kiểm tra xem giá trị có vi phạm ràng buộc không (ví dụ: các ô không được trùng nhau).
+    • Gán giá trị: Nếu không vi phạm, gán giá trị vào ô và tiếp tục.
+    • Kiểm tra mục tiêu: Nếu tất cả các biến đã được gán giá trị và tất cả các ràng buộc được thỏa mãn, thì ta đã tìm được lời giải.
+    • Backtracking (Quay lui): Nếu ta không thể gán giá trị hợp lệ cho một ô nào đó, quay lại bước trước và thử các giá trị khác.
+    
+    Kết thúc
+    Thuật toán dừng lại khi tìm được lời giải hoặc khi không còn khả năng gán giá trị hợp lệ cho các ô (kết thúc thất bại).
+    
+    Solution
+    Trả về một trạng thái trong đó tất cả các ô đều có giá trị hợp lệ, không vi phạm ràng buộc và đạt được mục tiêu (trạng thái đích).
+    
+    Hiệu suất
+    Ưu điểm:
+    Đảm bảo tìm được lời giải nếu tồn tại và thỏa mãn tất cả các ràng buộc.
+    Phù hợp với các bài toán có ràng buộc phức tạp như 8-puzzle.
+    Dễ dàng điều chỉnh và mở rộng đối với các bài toán có nhiều ràng buộc khác nhau.
+    
+    Nhược điểm:
+    Có thể gặp phải backtracking sâu, dẫn đến thời gian chạy lâu đối với các không gian trạng thái lớn.
+    Thuật toán có thể bị lặp vô hạn trong các bài toán không có giải pháp hoặc không có chiến lược chọn biến tốt (ví dụ: chọn các ô một cách ngẫu nhiên).
