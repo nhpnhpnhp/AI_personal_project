@@ -456,3 +456,232 @@ Iterative Deepening Depth-First Search (IDDFS) là một kỹ thuật kết hợ
 
     Không sử dụng thông tin heuristic → tốc độ chậm hơn các thuật toán có thông tin (A*, IDA*).
     
+2.3 Các thuật toán local search
+
+Stochastic Hill Climbing – Leo đồi ngẫu nhiên
+![stoch_1](https://github.com/user-attachments/assets/a971a7d7-365f-48d7-8445-f9878b0e1de3)
+
+Thuật toán Stochastic Hill Climbing là một biến thể của Hill Climbing, thuộc nhóm tìm kiếm cục bộ (local search), hoạt động bằng cách: Lựa chọn ngẫu nhiên một trong số các hàng xóm tốt hơn thay vì luôn chọn hàng xóm tốt nhất.
+
+    Các thành phần của bài toán tìm kiếm trong 8-Puzzle
+    Trạng thái ban đầu (Initial State):
+    Ma trận 3x3 gồm các ô số 1–8 và một ô trống (0).
+    
+    Tập hành động (Actions):
+    Di chuyển ô trống theo các hướng trái, phải, lên, xuống.
+    
+    Hàm chuyển trạng thái (Transition Model):
+    Hoán đổi ô trống với ô lân cận.
+    
+    Kiểm tra mục tiêu (Goal Test):
+    Kiểm tra trạng thái hiện tại có giống trạng thái đích không.
+    
+    Hàm đánh giá:
+    Heuristic h(n) – đo lường mức “gần đúng” của trạng thái so với đích (ví dụ: số ô sai vị trí, khoảng cách Manhattan).
+    
+    Hoạt động của thuật toán Stochastic Hill Climbing
+    Khởi tạo
+    Bắt đầu từ trạng thái ban đầu.
+    
+    Lặp lại
+    • Sinh tập các hàng xóm hợp lệ của trạng thái hiện tại.
+    • Chọn ngẫu nhiên một trong các hàng xóm có giá trị heuristic tốt hơn (nhỏ hơn) so với trạng thái hiện tại.
+    • Cập nhật trạng thái hiện tại thành hàng xóm được chọn.
+    • Nếu đạt đích → trả về lời giải.
+    
+    Kết thúc
+    Dừng khi tìm thấy đích hoặc không còn hàng xóm nào tốt hơn (tụt vào đỉnh cục bộ).
+    
+    Solution
+    Trả về chuỗi hành động từ trạng thái ban đầu đến trạng thái đích, đi theo các bước leo đồi ngẫu nhiên.
+    
+    Lưu ý: Thuật toán này có thể:
+    
+    Kẹt tại đỉnh cục bộ (local maxima).
+    
+    Lặp vô hạn trong vùng bằng phẳng (plateau) nếu không kiểm soát.
+    
+    Không đảm bảo tìm được lời giải tối ưu.
+    
+    Hiệu suất
+    Ưu điểm:
+    Đơn giản, dễ cài đặt.
+    Ít tốn bộ nhớ (chỉ cần lưu trạng thái hiện tại).
+    Tránh được một số bẫy mà Hill Climbing tham lam gặp phải (vì chọn ngẫu nhiên, không quá cứng nhắc).
+    
+    Nhược điểm:
+    Dễ kẹt tại đỉnh cục bộ.
+    Không đảm bảo tìm được lời giải tối ưu.
+    Không đảm bảo tìm thấy đích, đặc biệt nếu không cho phép quay lại hoặc restart.
+
+Steepest-Ascent Hill Climbing – Leo đồi dốc nhất
+![steep](https://github.com/user-attachments/assets/cfa0168e-978d-4f91-9726-dd093885c64d)
+
+Steepest-Ascent Hill Climbing là một thuật toán tìm kiếm cục bộ (local search) chọn hàng xóm tốt nhất tại mỗi bước. Đây là biến thể “tham lam nhất” của Hill Climbing, vì luôn chọn bước đi có cải thiện lớn nhất theo hàm đánh giá.
+
+    Các thành phần của bài toán tìm kiếm trong 8-Puzzle
+    Trạng thái ban đầu (Initial State):
+    Ma trận 3x3 gồm các ô số từ 1 đến 8 và một ô trống (0).
+    
+    Tập hành động (Actions):
+    Di chuyển ô trống theo 4 hướng: trái, phải, lên, xuống.
+    
+    Hàm chuyển trạng thái (Transition Model):
+    Hoán đổi vị trí ô trống với ô kề.
+    
+    Kiểm tra mục tiêu (Goal Test):
+    Trạng thái hiện tại có giống trạng thái đích không?
+    
+    Hàm đánh giá:
+    Heuristic 
+    h(n): đo mức gần đích:    Tổng khoảng cách Manhattan.
+    
+    Hoạt động của thuật toán Steepest-Ascent Hill Climbing
+    Khởi tạo
+    Bắt đầu từ trạng thái ban đầu.
+    
+    Lặp lại
+    • Sinh tất cả hàng xóm hợp lệ của trạng thái hiện tại.
+    • Chọn hàng xóm tốt nhất (có heuristic h(n) nhỏ nhất).
+    • Nếu hàng xóm tốt nhất không tốt hơn trạng thái hiện tại → dừng (tụt vào đỉnh cục bộ).
+    • Cập nhật trạng thái hiện tại = hàng xóm tốt nhất.
+    • Nếu đạt đích → trả về lời giải.
+    
+    Kết thúc
+    Trả về chuỗi hành động hoặc báo thất bại nếu kẹt ở đỉnh cục bộ.
+    
+    Solution
+    Trả về chuỗi hành động từ trạng thái ban đầu đến trạng thái đích, đi theo đường leo đồi “dốc nhất” – luôn ưu tiên bước cải thiện mạnh nhất.
+    
+    Lưu ý:
+    
+    Không backtrack.
+    
+    Dễ kẹt tại đỉnh cục bộ hoặc vùng bằng phẳng (plateau).
+    
+    Có thể lặp lại nhiều lần từ trạng thái khởi tạo khác để tăng cơ hội tìm đích.
+    
+    Hiệu suất
+    Ưu điểm:
+    Đơn giản, dễ cài đặt.
+    Nhanh, ít tốn bộ nhớ (chỉ cần lưu trạng thái hiện tại).
+    Khi chạy trên bề mặt đánh giá mượt mà, có thể nhanh chóng hội tụ.
+    
+    Nhược điểm:
+    Rất dễ kẹt ở đỉnh cục bộ (local maxima).
+    Không đảm bảo tìm lời giải tối ưu hoặc tìm thấy lời giải.
+    Không thể thoát khỏi plateau nếu không có cơ chế bổ sung (như random restart).
+
+
+Simple Hill Climbing – Leo đồi đơn giản
+![image](https://github.com/user-attachments/assets/72b1d49b-f18d-44e3-b6e1-a30d237cc5a8)
+
+Simple Hill Climbing là dạng cơ bản nhất của thuật toán Hill Climbing, thuộc nhóm tìm kiếm cục bộ. Thuật toán này chỉ xét một hàng xóm tại một thời điểm (thường theo thứ tự), và chấp nhận ngay nếu nó tốt hơn, thay vì tìm hàng xóm tốt nhất như Steepest-Ascent.
+
+    Các thành phần của bài toán tìm kiếm trong 8-Puzzle
+    Trạng thái ban đầu (Initial State):
+    Ma trận 3x3 gồm các ô số từ 1–8 và một ô trống (0).
+    
+    Tập hành động (Actions):
+    Di chuyển ô trống theo 4 hướng: trái, phải, lên, xuống.
+    
+    Hàm chuyển trạng thái (Transition Model):
+    Hoán đổi ô trống với ô lân cận.
+    
+    Kiểm tra mục tiêu (Goal Test):
+    So sánh trạng thái hiện tại với trạng thái đích.
+    
+    Hàm đánh giá:
+    Heuristic h(n): đo mức gần đích ( khoảng cách Manhattan).
+    
+    Hoạt động của thuật toán Simple Hill Climbing
+    Khởi tạo
+    Bắt đầu từ trạng thái ban đầu.
+    
+    Lặp lại
+    • Xét tuần tự từng hàng xóm của trạng thái hiện tại.
+    • Nếu gặp một hàng xóm có heuristic tốt hơn (nhỏ hơn) → chấp nhận ngay và cập nhật trạng thái.
+    • Nếu không có hàng xóm nào tốt hơn → dừng (tụt vào đỉnh cục bộ).
+    • Nếu đạt đích → trả về lời giải.
+    
+    Kết thúc
+    Trả về chuỗi hành động hoặc báo thất bại nếu kẹt.
+    
+    Solution
+    Trả về chuỗi hành động từ trạng thái ban đầu đến trạng thái đích, đi theo các bước cải thiện nhỏ, ngay khi có thể, mà không cần tìm hàng xóm tốt nhất toàn cục.
+    
+    Lưu ý:
+    
+    Cải thiện dần, nhưng dễ bị kẹt sớm vì chỉ nhìn hàng xóm đầu tiên tốt hơn, không quan tâm các lựa chọn khác.
+    
+    Dễ bị kẹt ở đỉnh cục bộ, vùng bằng phẳng (plateau) hoặc sườn dốc (ridge).
+    
+    Hiệu suất
+    Ưu điểm:
+    Cực kỳ đơn giản, dễ cài đặt.
+    Ít tốn bộ nhớ, chỉ cần lưu trạng thái hiện tại.
+    
+    Nhược điểm:
+    Dễ dừng sớm nếu gặp hàng xóm không tốt hơn.
+    Không tìm được hướng đi tốt hơn nếu đi sai lối.
+    Không đảm bảo tìm lời giải tối ưu hoặc thậm chí tìm ra đích.
+
+
+Simulated Annealing (SA) – Leo đồi có làm nguội
+![image](https://github.com/user-attachments/assets/8e2eb117-84dd-4a4e-bf53-1dc017ce4fc0)
+
+
+Simulated Annealing (SA) là một thuật toán tìm kiếm cục bộ lấy cảm hứng từ quá trình ủ nhiệt trong luyện kim.
+Khác với các thuật toán Hill Climbing khác, SA cho phép thỉnh thoảng chấp nhận bước lùi (move worse) để thoát khỏi đỉnh cục bộ, với xác suất giảm dần theo thời gian (làm nguội dần).
+
+    Các thành phần của bài toán tìm kiếm trong 8-Puzzle
+    Trạng thái ban đầu (Initial State):
+    Ma trận 3x3 gồm các ô số từ 1–8 và một ô trống (0).
+    
+    Tập hành động (Actions):
+    Di chuyển ô trống trái, phải, lên, xuống.
+    
+    Hàm chuyển trạng thái (Transition Model):
+    Hoán đổi vị trí ô trống với ô kề.
+    
+    Kiểm tra mục tiêu (Goal Test):
+    So sánh trạng thái hiện tại với trạng thái đích.
+    
+    Hàm đánh giá (Heuristic h(n)): tổng khoảng cách Manhattan.
+    
+    Hoạt động của thuật toán Simulated Annealing
+    Khởi tạo
+    
+    Bắt đầu từ trạng thái ban đầu.
+    
+    Đặt nhiệt độ ban đầu T.
+    
+    Lặp lại cho đến khi T ≈ 0
+    • Chọn ngẫu nhiên một hàng xóm của trạng thái hiện tại.
+    • Tính 
+    ΔE=h(current)−h(neighbor):
+     - Nếu     ΔE>0 → chấp nhận (hàng xóm tốt hơn).
+     - Nếu     ΔE≤0 → chấp nhận với xác suất 
+    ΔE/T(cho phép bước lùi).
+    • Giảm nhiệt độ 
+    𝑇
+    T theo lịch làm nguội (cooling schedule).
+    • Nếu đạt đích → trả về lời giải.
+    
+    Kết thúc
+    
+    Khi nhiệt độ giảm xuống rất thấp, thuật toán gần như dừng lại (không còn chấp nhận bước lùi).
+    
+    Solution
+    Trả về chuỗi hành động từ trạng thái ban đầu đến trạng thái đích, với khả năng “thoát kẹt” nhờ chấp nhận bước lùi có kiểm soát.
+    
+    Hiệu suất
+    Ưu điểm:
+    Có thể thoát khỏi đỉnh cục bộ nhờ bước lùi có xác suất.
+    Không cần nhớ nhiều trạng thái (bộ nhớ thấp).
+    Hiệu quả cho không gian trạng thái phức tạp, gồ ghề.
+    
+    Nhược điểm:
+    Cần thiết lập lịch làm nguội phù hợp (quá nhanh → kẹt, quá chậm → tốn thời gian).
+    Không đảm bảo tìm lời giải tối ưu.
+    Dễ bị kém ổn định nếu hàm đánh giá không trơn tru.
