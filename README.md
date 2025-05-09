@@ -29,7 +29,6 @@ Một bài toán tìm kiếm bao gồm các thành phần chính:
   + Solution: là chuỗi các hành động từ trạng thái ban đầu đến trạng thái mục tiêu sao cho tối ưu theo tiêu chí thời gian hoặc chi phí.
 
 b. Nhận xét về hiệu suất của thuật toán khi áp dụng lên 8-Puzzle và hình ảnh (gif) minh họa.
-![bfs](https://github.com/user-attachments/assets/ea3a408d-5e41-41c3-9bff-a147eb8d53ea)
 
 IDA*
 ![IDA](https://github.com/user-attachments/assets/f540281c-17c7-4aa0-bf0d-f1182f02ff3c)
@@ -109,3 +108,36 @@ Hiệu quả hơn Uniformed Search như UCS hay BFS trong nhiều trường hợ
 Nhược điểm:
 Tốn bộ nhớ nếu không gian trạng thái lớn (do lưu toàn bộ trạng thái mở và đóng).
 Hiệu suất phụ thuộc mạnh vào độ chính xác của heuristic.
+2.2 
+BFS
+![bfs](https://github.com/user-attachments/assets/ea3a408d-5e41-41c3-9bff-a147eb8d53ea)
+  Thuật toán Breadth-First Search (BFS) là một trong những phương pháp tìm kiếm không sử dụng thông tin bổ sung về trạng thái đích. BFS hoạt động theo nguyên lý mở rộng tất cả các trạng thái ở mức hiện tại trước khi chuyển sang mức tiếp theo, đảm bảo tìm ra lời giải có số bước ít nhất. 
+  
+    Các thành phần của bài toán tìm kiếm trong 8-Puzzle
+    Trạng thái ban đầu (Initial State) : Một mảng 3x3 gồm 8 ô số (1–8) và một ô trống (thường ký hiệu là 0). Vị trí các ô được sắp xếp ngẫu nhiên nhưng đảm bảo bài toán có lời giải.
+    Tập hành động (Actions): Tại mỗi trạng thái, ô trống có thể được di chuyển theo 4 hướng: trái, phải, lên, xuống, tùy vào vị trí của nó trong lưới.
+    Hàm chuyển trạng thái (Transition Model): Một hành động sẽ tạo ra một trạng thái mới bằng cách hoán đổi vị trí của ô trống với ô liền kề theo hướng di chuyển.
+    Kiểm tra mục tiêu (Goal Test): Kiểm tra xem trạng thái hiện tại có giống với trạng thái mục tiêu hay không. Trạng thái mục tiêu thường là:
+    Hàm chi phí (Path Cost): Mỗi hành động được gán chi phí là 1. Tổng chi phí bằng tổng số bước thực hiện từ trạng thái đầu đến trạng thái đích.
+    Hoạt động của thuật toán BFS
+      Sử dụng một hàng đợi (queue) để lưu các trạng thái chờ mở rộng.
+      Khởi tạo bằng trạng thái ban đầu và đưa nó vào hàng đợi.
+      Lặp lại:
+      Lấy trạng thái đầu tiên khỏi hàng đợi.
+      Nếu là trạng thái đích → trả về chuỗi hành động dẫn đến nó.
+      Nếu không, tạo tất cả các trạng thái con (sau khi thực hiện các hành động hợp lệ).
+      Thêm các trạng thái con chưa từng được duyệt vào hàng đợi.
+      Quá trình dừng khi tìm thấy trạng thái đích hoặc không còn trạng thái nào để mở rộng.
+      Thuật toán đảm bảo rằng trạng thái đích sẽ được tìm thấy với số bước ít nhất vì nó mở rộng theo từng mức.
+
+    Solution:
+    Lời giải là một chuỗi các hành động (ví dụ: ["Right", "Down", "Left", "Up"]) biến trạng thái ban đầu thành trạng thái đích. Với BFS, chuỗi này luôn là lời giải ngắn nhất (ít bước nhất).
+    Hiệu suất:
+    Ưu điểm
+    Đảm bảo tìm lời giải ngắn nhất về số bước.
+    Thực thi đơn giản, dễ kiểm chứng đúng sai.
+    Hoàn tất trong không gian trạng thái hữu hạn như 8-Puzzle.
+    Nhược điểm
+    Tốn bộ nhớ nghiêm trọng nếu lời giải sâu.
+    Không hiệu quả với các bài toán mở rộng như 15-Puzzle.
+    Không tận dụng bất kỳ thông tin nào về mục tiêu (không có heuristic).
