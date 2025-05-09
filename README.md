@@ -108,7 +108,9 @@ Hiệu quả hơn Uniformed Search như UCS hay BFS trong nhiều trường hợ
 Nhược điểm:
 Tốn bộ nhớ nếu không gian trạng thái lớn (do lưu toàn bộ trạng thái mở và đóng).
 Hiệu suất phụ thuộc mạnh vào độ chính xác của heuristic.
-2.2 
+
+2.2 Các thuật toán tìm kiếm không có thông tin
+
 BFS
 ![bfs](https://github.com/user-attachments/assets/ea3a408d-5e41-41c3-9bff-a147eb8d53ea)
   Thuật toán Breadth-First Search (BFS) là một trong những phương pháp tìm kiếm không sử dụng thông tin bổ sung về trạng thái đích. BFS hoạt động theo nguyên lý mở rộng tất cả các trạng thái ở mức hiện tại trước khi chuyển sang mức tiếp theo, đảm bảo tìm ra lời giải có số bước ít nhất. 
