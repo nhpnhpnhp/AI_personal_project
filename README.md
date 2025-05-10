@@ -23,13 +23,13 @@ Chương trình được tổ chức thành nhiều nhóm thuật toán dựa th
 IDA* – Iterative Deepening A*
 ![IDA](https://github.com/user-attachments/assets/f540281c-17c7-4aa0-bf0d-f1182f02ff3c)
 
-Thuật toán IDA* kết hợp hai chiến lược mạnh mẽ:
+Thuật toán IDA* kết hợp hai thuật toán:
 
 A*: Tìm kiếm theo chi phí tổng f(n) = g(n) + h(n) (chi phí đến hiện tại + ước lượng đến đích).
 
 Iterative Deepening (tìm kiếm sâu dần): Tìm theo mức giới hạn chi phí và mở rộng dần mức giới hạn này.
 
-IDA* tận dụng bộ nhớ thấp của DFS và sức mạnh định hướng của heuristic trong A*. Đây là một trong những thuật toán hiệu quả nhất cho các bài toán như 8-Puzzle hoặc 15-Puzzle.
+IDA* tận dụng bộ nhớ thấp của DFS và sức mạnh định hướng của heuristic trong A*. Đây là một trong những thuật toán hiệu quả nhất cho các bài toán như 8-Puzzle.
 
     Các thành phần của bài toán tìm kiếm trong 8-Puzzle
     Trạng thái ban đầu (Initial State): Ma trận 3x3 gồm các ô số từ 1 đến 8 và một ô trống (0). Đảm bảo trạng thái có lời giải.
@@ -42,11 +42,7 @@ IDA* tận dụng bộ nhớ thấp của DFS và sức mạnh định hướng 
 
     Hàm chi phí (Path Cost): Mỗi bước di chuyển có chi phí 1. Tổng chi phí = tổng số bước.
 
-    Heuristic (Hàm ước lượng h(n)): Dùng để định hướng tìm kiếm. Phổ biến:
-
-    Số ô sai vị trí (Misplaced Tiles).
-
-    Tổng khoảng cách Manhattan (Manhattan Distance) – thường hiệu quả hơn.
+    Heuristic (Hàm ước lượng h(n)): Dùng để định hướng tìm kiếm. Phổ biến: Tổng khoảng cách Manhattan (Manhattan Distance).
 
     Hoạt động của thuật toán IDA*
     Khởi tạo threshold bằng giá trị f(start) = g(start) + h(start) của trạng thái ban đầu.
@@ -72,7 +68,7 @@ IDA* tận dụng bộ nhớ thấp của DFS và sức mạnh định hướng 
     
     Tìm lời giải tối ưu nếu heuristic phù hợp.
     
-    Thích hợp cho bài toán có không gian trạng thái lớn như 15-Puzzle.
+    Thích hợp cho bài toán có không gian trạng thái lớn.
     
     Nhược điểm:
     Phải duyệt lại nhiều trạng thái trong mỗi vòng lặp do đặc trưng của DFS.
@@ -84,23 +80,18 @@ IDA* tận dụng bộ nhớ thấp của DFS và sức mạnh định hướng 
   Beam Search
     ![beam](https://github.com/user-attachments/assets/9e31a041-df47-4501-890e-de4192f9d398)
 
-  Thuật toán Beam Search là phiên bản giới hạn bộ nhớ của tìm kiếm theo Best-First Search. Tại mỗi bước mở rộng, chỉ giữ lại k nút có giá trị đánh giá tốt nhất (gọi là beam width) thay vì giữ toàn bộ các nút sinh ra. Điều này giúp giảm bộ nhớ và tập trung vào các nhánh hứa hẹn nhất.
+  Thuật toán Beam Search là phiên bản giới hạn bộ nhớ của tìm kiếm theo Best-First Search. Tại mỗi bước mở rộng, chỉ giữ lại k nút có giá trị đánh giá tốt nhất (gọi là beam width) thay vì giữ toàn bộ các nút sinh ra. Điều này giúp giảm bộ nhớ và tập trung vào các nhánh có tiềm năng nhất.
 
-    Các thành phần của bài toán tìm kiếm trong 8-Puzzle
-    Trạng thái ban đầu (Initial State):
-    Ma trận 3x3 gồm các ô số 1–8 và một ô trống (0). Đảm bảo trạng thái có lời giải.
+    Các thành phần của bài toán :
+    Trạng thái ban đầu (Initial State):    Ma trận 3x3 gồm các ô số 1–8 và một ô trống (0). Đảm bảo trạng thái có lời giải.
     
-    Tập hành động (Actions):
-    Di chuyển ô trống theo bốn hướng: trái, phải, lên, xuống.
+    Tập hành động (Actions):    Di chuyển ô trống theo bốn hướng: trái, phải, lên, xuống.
     
-    Hàm chuyển trạng thái (Transition Model):
-    Hoán đổi vị trí ô trống với ô kề.
+    Hàm chuyển trạng thái (Transition Model):    Hoán đổi vị trí ô trống với ô kề.
     
-    Kiểm tra mục tiêu (Goal Test):
-    So sánh trạng thái hiện tại với trạng thái đích.
+    Kiểm tra mục tiêu (Goal Test):    So sánh trạng thái hiện tại với trạng thái đích.
     
-    Hàm chi phí / Hàm đánh giá:
-    Trong Beam Search, ta thường chỉ dựa vào heuristic h(n) để chọn nút tốt, bỏ qua chi phí g(n).
+    Hàm chi phí / Hàm đánh giá:    Trong Beam Search, ta thường chỉ dựa vào heuristic h(n) để chọn nút tốt, bỏ qua chi phí g(n).
     
     Hoạt động của thuật toán Beam Search
     Khởi tạo
@@ -116,14 +107,14 @@ IDA* tận dụng bộ nhớ thấp của DFS và sức mạnh định hướng 
     Thuật toán dừng khi tìm thấy đích hoặc không còn nút nào để mở rộng.
     
     Solution
-    Trả về chuỗi hành động từ trạng thái ban đầu đến đích, theo một trong k nhánh hứa hẹn nhất.
+    Trả về chuỗi hành động từ trạng thái ban đầu đến đích, theo một trong k nhánh tiềm năng nhất.
     Lưu ý: Beam Search không đảm bảo tìm được lời giải tối ưu vì nó có thể loại bỏ nhánh tối ưu nếu không nằm trong beam tại một bước nào đó.
     
     Hiệu suất
     Ưu điểm:
     Tối ưu hóa bộ nhớ: chỉ lưu k nút tại mỗi bước.
     Nhanh hơn so với các thuật toán tìm kiếm toàn cục (như A*) nếu beam width đủ nhỏ.
-    Thích hợp cho các bài toán lớn hoặc cần kết quả nhanh (ví dụ: xử lý ngôn ngữ tự nhiên, dịch máy).
+    Thích hợp cho các bài toán lớn hoặc cần kết quả nhanh.
     
     Nhược điểm:
     Không đảm bảo tìm được lời giải tối ưu.
