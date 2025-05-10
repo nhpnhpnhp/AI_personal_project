@@ -3,7 +3,7 @@
 
   Mục tiêu của chương trình là xây dựng một hệ thống giải bài toán 8-Puzzle bằng cách áp dụng nhiều nhóm thuật toán khác nhau trong lĩnh vực Trí Tuệ Nhân Tạo. Việc này nhằm so sánh hiệu quả giữa các thuật toán, hiểu rõ đặc điểm, ưu nhược điểm của từng phương pháp trong việc giải quyết bài toán tìm kiếm, từ đó nâng cao khả năng chọn lựa giải pháp phù hợp cho các vấn đề tương tự trong thực tế.
 
-3. Nội dung
+2. Nội dung
 Chương trình được tổ chức thành nhiều nhóm thuật toán dựa theo phân loại trong AI:
 
   1.Uniformed Search: BFS, DFS, UCS, IDDFS
