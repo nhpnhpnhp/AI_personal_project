@@ -1,4 +1,4 @@
-![STOCH](https://github.com/user-attachments/assets/2cc4eff9-d9c4-4fe3-adac-26025e274fda)# AI_personal_project
+# AI_personal_project
 1. Mục tiêu
 
   Mục tiêu của chương trình là xây dựng một hệ thống giải bài toán 8-Puzzle bằng cách áp dụng nhiều nhóm thuật toán khác nhau trong lĩnh vực Trí Tuệ Nhân Tạo. Việc này nhằm so sánh hiệu quả giữa các thuật toán, hiểu rõ đặc điểm, ưu nhược điểm của từng phương pháp trong việc giải quyết bài toán tìm kiếm, từ đó nâng cao khả năng chọn lựa giải pháp phù hợp cho các vấn đề tương tự trong thực tế.
@@ -77,61 +77,6 @@ IDA* tận dụng bộ nhớ thấp của DFS và sức mạnh định hướng 
     Hiệu suất phụ thuộc lớn vào chất lượng của heuristic.
     
     Không hiệu quả nếu heuristic kém hoặc không nhất quán.
-
-  Beam Search
-    ![beam](https://github.com/user-attachments/assets/9e31a041-df47-4501-890e-de4192f9d398)
-
-  Thuật toán Beam Search là phiên bản giới hạn bộ nhớ của tìm kiếm theo Best-First Search. Tại mỗi bước mở rộng, chỉ giữ lại k nút có giá trị đánh giá tốt nhất (gọi là beam width) thay vì giữ toàn bộ các nút sinh ra. Điều này giúp giảm bộ nhớ và tập trung vào các nhánh có tiềm năng nhất.
-
-    Các thành phần của bài toán :
-    Trạng thái ban đầu (Initial State):    Ma trận 3x3 gồm các ô số 1–8 và một ô trống (0). Đảm bảo trạng thái có lời giải.
-    
-    Tập hành động (Actions):    Di chuyển ô trống theo bốn hướng: trái, phải, lên, xuống.
-    
-    Hàm chuyển trạng thái (Transition Model):    Hoán đổi vị trí ô trống với ô kề.
-    
-    Kiểm tra mục tiêu (Goal Test):    So sánh trạng thái hiện tại với trạng thái đích.
-    
-    Hàm chi phí / Hàm đánh giá:    Trong Beam Search, ta thường chỉ dựa vào heuristic h(n) để chọn nút tốt, bỏ qua chi phí g(n).
-    
-    Hoạt động của thuật toán Beam Search
-    Khởi tạo
-    Tạo danh sách beam (beam list) gồm trạng thái ban đầu.
-    
-    Lặp lại
-    • Với mỗi nút trong beam hiện tại: mở rộng các trạng thái con.
-    • Gom tất cả trạng thái con vào một danh sách tạm.
-    • Chọn ra k trạng thái con có giá trị heuristic tốt nhất (nhỏ nhất nếu là hàm chi phí) để tạo beam mới.
-    • Nếu trong beam mới có trạng thái đích → trả về lời giải.
-    
-    Kết thúc
-    Thuật toán dừng khi tìm thấy đích hoặc không còn nút nào để mở rộng.
-    
-    Solution
-    Trả về chuỗi hành động từ trạng thái ban đầu đến đích, theo một trong k nhánh tiềm năng nhất.
-    Lưu ý: Beam Search không đảm bảo tìm được lời giải tối ưu vì nó có thể loại bỏ nhánh tối ưu nếu không nằm trong beam tại một bước nào đó.
-    
-    Hiệu suất
-    Ưu điểm:
-    Tối ưu hóa bộ nhớ: chỉ lưu k nút tại mỗi bước.
-    Nhanh hơn so với các thuật toán tìm kiếm toàn cục (như A*) nếu beam width đủ nhỏ.
-    Thích hợp cho các bài toán lớn hoặc cần kết quả nhanh.
-    
-    Nhược điểm:
-    Không đảm bảo tìm được lời giải tối ưu.
-    Phụ thuộc mạnh vào giá trị beam width – quá nhỏ có thể bỏ lỡ lời giải, quá lớn lại tăng chi phí tính toán.
-    Hiệu quả phụ thuộc nhiều vào chất lượng heuristic.
-    
-
-  - Genetic Algorithm (GA): Sử dụng cơ chế chọn lọc tự nhiên (lai ghép, đột biến) để tiến hóa lời giải qua nhiều thế hệ.
-  + Genetic Algorithm: không luôn tìm ra lời giải tối ưu, phụ thuộc nhiều vào cách biểu diễn cá thể và hàm fitness; tuy nhiên có thể hiệu quả trong không gian tìm kiếm lớn hoặc không xác định.
-  + Trong GA, crossover (lai ghép) và mutation (đột biến) phải đảm bảo sinh ra cá thể hợp lệ.
-    Nhưng trong 8-puzzle:
- → Nếu “trộn” hai bàn cờ, rất dễ tạo ra trạng thái không thể đạt được qua các bước hợp pháp (vì chỉ một số hoán đổi là hợp lệ).
- → Mutation (thay đổi ngẫu nhiên) cũng dễ tạo ra trạng thái vi phạm ràng buộc.
-  → Việc thiết kế các toán tử GA phù hợp để giữ trạng thái hợp lệ rất khó và phức tạp.
-![image](https://github.com/user-attachments/assets/cd810586-4cc8-4270-b6c1-aaa43961ebff)
-
 
 
 Greedy Search
@@ -454,7 +399,7 @@ Iterative Deepening Depth-First Search (IDDFS) là một kỹ thuật kết hợ
 2.3 Các thuật toán local search
 
 Stochastic Hill Climbing – Leo đồi ngẫu nhiên
-![STOCH](https://github.com/user-attachments/assets/093a1f10-2965-42b6-8339-893a10c1826c)
+![STOCH](https://github.com/user-attachments/assets/2cc4eff9-d9c4-4fe3-adac-26025e274fda)
 
 Thuật toán Stochastic Hill Climbing là một biến thể của Hill Climbing, thuộc nhóm tìm kiếm cục bộ (local search), hoạt động bằng cách: Lựa chọn ngẫu nhiên một trong số các hàng xóm tốt hơn thay vì luôn chọn hàng xóm tốt nhất.
 
@@ -678,6 +623,61 @@ Khác với các thuật toán Hill Climbing khác, SA cho phép thỉnh thoản
     Cần thiết lập lịch làm nguội phù hợp (quá nhanh → kẹt, quá chậm → tốn thời gian).
     Không đảm bảo tìm lời giải tối ưu.
     Dễ bị kém ổn định nếu hàm đánh giá không trơn tru.
+  Beam Search
+![BEAM](https://github.com/user-attachments/assets/41926925-c962-42fb-8502-be5b7145aaca)
+
+  Thuật toán Beam Search là phiên bản giới hạn bộ nhớ của tìm kiếm theo Best-First Search. Tại mỗi bước mở rộng, chỉ giữ lại k nút có giá trị đánh giá tốt nhất (gọi là beam width) thay vì giữ toàn bộ các nút sinh ra. Điều này giúp giảm bộ nhớ và tập trung vào các nhánh có tiềm năng nhất.
+
+    Các thành phần của bài toán :
+    Trạng thái ban đầu (Initial State):    Ma trận 3x3 gồm các ô số 1–8 và một ô trống (0). Đảm bảo trạng thái có lời giải.
+    
+    Tập hành động (Actions):    Di chuyển ô trống theo bốn hướng: trái, phải, lên, xuống.
+    
+    Hàm chuyển trạng thái (Transition Model):    Hoán đổi vị trí ô trống với ô kề.
+    
+    Kiểm tra mục tiêu (Goal Test):    So sánh trạng thái hiện tại với trạng thái đích.
+    
+    Hàm chi phí / Hàm đánh giá:    Trong Beam Search, ta thường chỉ dựa vào heuristic h(n) để chọn nút tốt, bỏ qua chi phí g(n).
+    
+    Hoạt động của thuật toán Beam Search
+    Khởi tạo
+    Tạo danh sách beam (beam list) gồm trạng thái ban đầu.
+    
+    Lặp lại
+    • Với mỗi nút trong beam hiện tại: mở rộng các trạng thái con.
+    • Gom tất cả trạng thái con vào một danh sách tạm.
+    • Chọn ra k trạng thái con có giá trị heuristic tốt nhất (nhỏ nhất nếu là hàm chi phí) để tạo beam mới.
+    • Nếu trong beam mới có trạng thái đích → trả về lời giải.
+    
+    Kết thúc
+    Thuật toán dừng khi tìm thấy đích hoặc không còn nút nào để mở rộng.
+    
+    Solution
+    Trả về chuỗi hành động từ trạng thái ban đầu đến đích, theo một trong k nhánh tiềm năng nhất.
+    Lưu ý: Beam Search không đảm bảo tìm được lời giải tối ưu vì nó có thể loại bỏ nhánh tối ưu nếu không nằm trong beam tại một bước nào đó.
+    
+    Hiệu suất
+    Ưu điểm:
+    Tối ưu hóa bộ nhớ: chỉ lưu k nút tại mỗi bước.
+    Nhanh hơn so với các thuật toán tìm kiếm toàn cục (như A*) nếu beam width đủ nhỏ.
+    Thích hợp cho các bài toán lớn hoặc cần kết quả nhanh.
+    
+    Nhược điểm:
+    Không đảm bảo tìm được lời giải tối ưu.
+    Phụ thuộc mạnh vào giá trị beam width – quá nhỏ có thể bỏ lỡ lời giải, quá lớn lại tăng chi phí tính toán.
+    Hiệu quả phụ thuộc nhiều vào chất lượng heuristic.
+    
+
+  - Genetic Algorithm (GA): Sử dụng cơ chế chọn lọc tự nhiên (lai ghép, đột biến) để tiến hóa lời giải qua nhiều thế hệ.
+  + Genetic Algorithm: không luôn tìm ra lời giải tối ưu, phụ thuộc nhiều vào cách biểu diễn cá thể và hàm fitness; tuy nhiên có thể hiệu quả trong không gian tìm kiếm lớn hoặc không xác định.
+  + Trong GA, crossover (lai ghép) và mutation (đột biến) phải đảm bảo sinh ra cá thể hợp lệ.
+    Nhưng trong 8-puzzle:
+ → Nếu “trộn” hai bàn cờ, rất dễ tạo ra trạng thái không thể đạt được qua các bước hợp pháp (vì chỉ một số hoán đổi là hợp lệ).
+ → Mutation (thay đổi ngẫu nhiên) cũng dễ tạo ra trạng thái vi phạm ràng buộc.
+  → Việc thiết kế các toán tử GA phù hợp để giữ trạng thái hợp lệ rất khó và phức tạp.
+![image](https://github.com/user-attachments/assets/334d700a-22d9-4cc6-867e-b72bf9b8101d)
+
+
 
 Q-Learning – Học tăng cường không mô hình
 ![QLEARN](https://github.com/user-attachments/assets/c1afe1bf-7555-4a87-853f-8e69fe292087)
