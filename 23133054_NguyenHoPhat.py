@@ -62,115 +62,79 @@ class HeuristicSolver(PuzzleSolver):
 
 #region [Các thuật toán cụ thể]
 
-class GeneticSolver(HeuristicSolver):
-    def __init__(self, population_size=100, generations=500, mutation_rate=0.1):
+class GeneticSolver(PuzzleSolver):
+    def __init__(self, population_size=200, generations=500, mutation_rate=0.2, chromosome_length=30):
         self.population_size = population_size
         self.generations = generations
         self.mutation_rate = mutation_rate
+        self.chrom_len = chromosome_length
+        self.moves = directions  # [(0,1),(0,-1),(1,0),(-1,0)]
 
     def solve(self, start, goal):
-        """Giải bài toán 8-puzzle bằng thuật toán di truyền (Genetic Algorithm)"""
-
-        def get_neighbors(state):
-            """Lấy các trạng thái hợp lệ từ trạng thái hiện tại"""
-            for i in range(3):
-                for j in range(3):
-                    if state[i][j] == 0:
-                        x, y = i, j
-                        break
-
-            moves = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # Các hướng di chuyển: lên, xuống, trái, phải
-            neighbors = []
-            for dx, dy in moves:
-                nx, ny = x + dx, y + dy
-                if 0 <= nx < 3 and 0 <= ny < 3:
-                    new_state = [list(row) for row in state]
-                    new_state[x][y], new_state[nx][ny] = new_state[nx][ny], new_state[x][y]
-                    neighbors.append(tuple(tuple(row) for row in new_state))
-            return neighbors
-
-        def generate_state_from_start(start, steps=10):
-            """Khởi tạo một trạng thái hợp lệ từ start, thực hiện các bước di chuyển hợp lệ"""
-            current = start
-            path = [start]
-            for _ in range(steps):
-                neighbors = get_neighbors(current)
-                next_state = random.choice(neighbors)  # Chọn ngẫu nhiên 1 trạng thái hợp lệ
-                path.append(next_state)
-                current = next_state
-            return current, path
-
+        # Hamming distance làm fitness
         def fitness(state):
-            """Đánh giá độ tốt của trạng thái (sử dụng heuristic)"""
-            return -self.heuristic(state)
+            mismatches = sum(
+                1 for i in range(GRID_SIZE) for j in range(GRID_SIZE)
+                if state[i][j] != 0 and state[i][j] != goal[i][j]
+            )
+            return mismatches
 
-        def crossover(parent1, parent2):
-            """Lai ghép hai trạng thái (giữ tính hợp lệ)"""
-            def flatten(t): return [x for row in t for x in row]
-            
-            p1_flat = flatten(parent1[0])
-            p2_flat = flatten(parent2[0])
+        def apply_moves(state, moves):
+            s = state
+            for dx, dy in moves:
+                br, bc = find_blank(s)
+                nr, nc = br + dx, bc + dy
+                if 0 <= nr < GRID_SIZE and 0 <= nc < GRID_SIZE:
+                    s = swap_tiles(s, br, bc, nr, nc)
+            return s
 
-            child = [-1] * 9
-            used = set()
-            
-            cut = random.randint(0, 8)
-            for i in range(cut):
-                child[i] = p1_flat[i]
-                used.add(p1_flat[i])
+        def random_chromosome():
+            return [random.choice(self.moves) for _ in range(self.chrom_len)]
 
-            idx = cut
-            for val in p2_flat:
-                if val not in used:
-                    child[idx] = val
-                    idx += 1
+        def crossover(a, b):
+            cut = random.randint(1, self.chrom_len - 2)
+            return a[:cut] + b[cut:]
 
-            new_state = tuple(tuple(child[i*3:(i+1)*3]) for i in range(3))
-            return (new_state, parent1[1] + [new_state])
+        def mutate(chrom):
+            return [random.choice(self.moves) if random.random() < self.mutation_rate else m 
+                    for m in chrom]
 
-        def mutate(state, path):
-            """Đột biến hợp lệ (hoán đổi 2 ô hợp lệ)"""
-            for i in range(3):
-                for j in range(3):
-                    if state[i][j] == 0:
-                        x, y = i, j
-                        break
+        # Khởi tạo quần thể
+        population = [random_chromosome() for _ in range(self.population_size)]
 
-            neighbors = get_neighbors(state)
-            new_state = random.choice(neighbors)
+        for gen in range(self.generations):
+            # Đánh giá và sort theo fitness
+            scored = []
+            for chrom in population:
+                state = apply_moves(start, chrom)
+                score = fitness(state)
+                if score == 0:
+                    # rebuild path và trả về
+                    path = [start]
+                    for m in chrom:
+                        br, bc = find_blank(path[-1])
+                        nr, nc = br + m[0], bc + m[1]
+                        if 0 <= nr < GRID_SIZE and 0 <= nc < GRID_SIZE:
+                            path.append(swap_tiles(path[-1], br, bc, nr, nc))
+                            if path[-1] == goal:
+                                return path
+                    return path
+                scored.append((score, chrom))
+            scored.sort(key=lambda x: x[0])
+            # Elitism: giữ 20% best
+            top_k = [chrom for _, chrom in scored[:self.population_size // 5]]
 
-            return new_state, path + [new_state]
-
-        def valid_state(state):
-            """Kiểm tra trạng thái có hợp lệ không"""
-            return state in get_neighbors(state)
-
-        # Khởi tạo quần thể từ start qua các bước di chuyển hợp lệ
-        population = [generate_state_from_start(start, steps=10) for _ in range(self.population_size)]
-
-        for generation in range(self.generations):
-            # Sắp xếp quần thể theo fitness (từ tốt đến xấu)
-            population.sort(key=lambda x: fitness(x[0]), reverse=True)
-
-            # Kiểm tra xem đã tìm được giải pháp chưa
-            if population[0][0] == goal:
-                return population[0][1]  # Trả về path
-
-            # Chọn lọc các cá thể tốt nhất
-            selected = population[:self.population_size // 5]
-            new_population = selected[:]
-
-            # Lai ghép và đột biến để tạo thế hệ mới
-            while len(new_population) < self.population_size:
-                p1, p2 = random.sample(selected, 2)
+            # Sinh thế hệ mới
+            new_pop = []
+            while len(new_pop) < self.population_size:
+                p1, p2 = random.sample(top_k, 2)
                 child = crossover(p1, p2)
-                if random.random() < self.mutation_rate:
-                    child = mutate(child[0], child[1])
-                new_population.append(child)
+                child = mutate(child)
+                new_pop.append(child)
+            population = new_pop
 
-            population = new_population  # Cập nhật quần thể
-
-        return None  # Nếu không tìm thấy lời giải sau các thế hệ
+        # Nếu hết thế hệ mà chưa tìm ra
+        return None
 
 class BFSSolver(PuzzleSolver):
     def solve(self, start, goal):
@@ -341,170 +305,49 @@ class HillClimbingSolver(HeuristicSolver):
 
     def _state_to_tuple(self, state):
         return tuple(tuple(row) for row in state)
-import random
-import math
-from copy import deepcopy
-
 class SimulatedAnnealingSolver(HeuristicSolver):
-    def solve(self, start, goal, initial_temp=1000, cooling_rate=0.995, max_steps=10000):
-        current_state = start
-        best_state = start
-        best_h = self.heuristic(start)
-        current_h = best_h
-        path = [start]  # Only store key states to save memory
-        
-        # Use limited-size set for visited states to prevent memory explosion
-        visited = set()
-        visited.add(self._state_to_tuple(start))
-        
-        T = initial_temp
-        no_improvement_steps = 0
-        max_no_improvement = 500  # Stop if no improvement for this many steps
-        
-        for step in range(max_steps):
-            if current_state == goal:
-                return self._reconstruct_path(path, start, current_state)
-            
-            # Get all possible neighbors first
-            neighbors = self._get_all_neighbors(current_state)
-            
-            # Filter out recently visited states (but not all to allow some revisiting)
-            unvisited_neighbors = [n for n in neighbors 
-                                 if self._state_to_tuple(n) not in visited or random.random() < 0.1]
-            
-            # If no unvisited neighbors, select from all neighbors
-            if not unvisited_neighbors:
-                next_state = random.choice(neighbors)
-            else:
-                # Prefer neighbors with better heuristic
-                neighbors_sorted = sorted(unvisited_neighbors, key=lambda x: self.heuristic(x))
-                next_state = neighbors_sorted[0] if random.random() < 0.7 else random.choice(neighbors_sorted[:3])
-            
-            next_h = self.heuristic(next_state)
-            delta_e = next_h - current_h
-            
-            # Acceptance criteria
-            if delta_e < 0 or math.exp(-delta_e / max(T, 1e-10)) > random.random():
-                current_state = next_state
-                current_h = next_h
-                
-                # Store only every N states to save memory
-                if step % 10 == 0 or next_h < best_h:
-                    path.append(current_state)
-                
-                visited.add(self._state_to_tuple(current_state))
-                
-                # Update best state found
-                if next_h < best_h:
-                    best_state = current_state
-                    best_h = next_h
-                    no_improvement_steps = 0
-                else:
-                    no_improvement_steps += 1
-            else:
-                no_improvement_steps += 1
-            
-            # Cooling schedule
-            T *= cooling_rate
-            
-            # Early termination conditions
-            if best_h == 0:  # Found solution
-                return self._reconstruct_path(path, start, best_state)
-            if no_improvement_steps >= max_no_improvement:
-                break
-            if T < 1e-10 and best_h <= 2:  # Close to solution
-                # Try to complete the solution with greedy moves
-                final_path = self._complete_with_greedy(best_state, goal)
-                if final_path:
-                    return self._reconstruct_path(path, start, best_state) + final_path[1:]
-                break
-        
-        # Try to return the best path found
-        if best_state == goal:
-            return self._reconstruct_path(path, start, best_state)
-        
-        # Final attempt with greedy approach from best state found
-        final_path = self._complete_with_greedy(best_state, goal)
-        if final_path:
-            return self._reconstruct_path(path, start, best_state) + final_path[1:]
-        
-        return None
+    def solve(self, start, goal):
+        current = start
+        current_cost = self.heuristic(current)
+        temperature = 100.0
+        cooling_rate = 0.99
+        min_temperature = 0.1
+        max_steps = 10000
 
-    def _get_all_neighbors(self, state):
-
-        blank_i, blank_j = find_blank(state)
-        neighbors = []
-        
-        for di, dj in directions:
-            new_i, new_j = blank_i + di, blank_j + dj
-            if 0 <= new_i < GRID_SIZE and 0 <= new_j < GRID_SIZE:
-                neighbors.append(swap_tiles(state, blank_i, blank_j, new_i, new_j))
-        
-        return neighbors
-
-    def _state_to_tuple(self, state):
-        return tuple(tuple(row) for row in state)
-
-    def _reconstruct_path(self, sparse_path, start, end):
-        if not sparse_path:
-            return [start]
-        
-        # If end state is already in the path, return up to that point
-        for i, state in enumerate(sparse_path):
-            if state == end:
-                return sparse_path[:i+1]
-        
-        # Otherwise find the closest state and build path to end
-        closest_state = sparse_path[-1]
-        path_to_end = self._build_path_between(closest_state, end)
-        return sparse_path + path_to_end[1:]
-
-    def _build_path_between(self, start, end):
-        if start == end:
-            return [start]
-        
-        queue = deque()
-        queue.append((start, [start]))
-        visited = set()
-        visited.add(self._state_to_tuple(start))
-        
-        while queue:
-            current, path = queue.popleft()
-            
-            for neighbor in self._get_all_neighbors(current):
-                if neighbor == end:
-                    return path + [neighbor]
-                
-                neighbor_tuple = self._state_to_tuple(neighbor)
-                if neighbor_tuple not in visited:
-                    visited.add(neighbor_tuple)
-                    queue.append((neighbor, path + [neighbor]))
-        
-        return None
-
-    def _complete_with_greedy(self, state, goal):
-        current = state
         path = [current]
-        visited = set()
-        visited.add(self._state_to_tuple(current))
-        
-        while current != goal:
-            neighbors = self._get_all_neighbors(current)
+
+        for step in range(max_steps):
+            if current == goal:
+                return path
+
+            neighbors = self.get_neighbors(current)
             if not neighbors:
-                return None
-                
-            # Choose neighbor with best heuristic
-            neighbors.sort(key=lambda x: self.heuristic(x))
-            for neighbor in neighbors:
-                if self._state_to_tuple(neighbor) not in visited:
-                    current = neighbor
-                    path.append(current)
-                    visited.add(self._state_to_tuple(current))
-                    break
-            else:
-                return None  # No unvisited neighbors
-        
-        return path
+                break
+
+            next_state = random.choice(neighbors)
+            next_cost = self.heuristic(next_state)
+
+            delta = next_cost - current_cost
+            if delta < 0 or random.random() < math.exp(-delta / temperature):
+                current = next_state
+                current_cost = next_cost
+                path.append(current)
+
+            temperature *= cooling_rate
+            if temperature < min_temperature:
+                break
+
+        return path if current == goal else None
+
+    def get_neighbors(self, state):
+        blank = find_blank(state)
+        neighbors = []
+        for dx, dy in directions:
+            nx, ny = blank[0] + dx, blank[1] + dy
+            if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
+                new_state = swap_tiles(state, *blank, nx, ny)
+                neighbors.append(new_state)
+        return neighbors
 
 class BeamSearchSolver(HeuristicSolver):
     def __init__(self, beam_width=2):  # Thêm hàm khởi tạo
@@ -708,13 +551,6 @@ class IDAStarSolver(HeuristicSolver):
                     path.pop()
         return min_cost
 
-import random
-
-import random
-from copy import deepcopy
-
-import random
-from copy import deepcopy
 
 class SteepestHillClimbingSolver(HeuristicSolver):
     def solve(self, start, goal, max_attempts=100):
@@ -1192,14 +1028,15 @@ class PuzzleUI:
             Button("IDA*", (10, 560), "IDA*", (0, 255, 127)),
             Button("A*", (BUTTON_SIZE+20, 560), "A*", (0, 255, 127)),
             Button("Greedy", (2*BUTTON_SIZE+30, 560), "Greedy", (0, 255, 127)),
-            Button("Beam", (3*BUTTON_SIZE+40, 560), "Beam", (0, 255, 127)),
-            Button("Genetic", (4*BUTTON_SIZE+60, 560), "Genetic", (0, 255, 127)),
+            Button("Beam", (5*BUTTON_SIZE+60, 620), "Beam", (200, 120, 200)),
+            Button("Genetic", (4*BUTTON_SIZE+50, 620), "Genetic", (200, 120, 200)),
 
             # Hàng 3
             Button("STOCH", (10, 620), "STOCH", (200, 120, 200)),
             Button("STEEPH", (BUTTON_SIZE+20, 620), "STEEPH", (200, 120, 200)),
             Button("SA", (2*BUTTON_SIZE+30, 620), "SA", (200, 120, 200)),
             Button("SIMPLE", (3*BUTTON_SIZE+40, 620), "SIMPLE", (200, 120, 200)),
+            Button("New w/ FC", (4*BUTTON_SIZE+50, 560), "FORWARD_CHECK", (0, 0, 102)),
 
 
             # Hàng 4
@@ -1207,7 +1044,9 @@ class PuzzleUI:
             Button("SWNA", (BUTTON_SIZE+20, 680), "Nondeterministic",(110, 15, 10)),
             Button("PO", (2*BUTTON_SIZE+30, 680), "PartialObservation", (110, 15, 10)),
             Button("Q-LEARN", (3*BUTTON_SIZE+40, 680), "Q-Learning", (255, 153, 0)),
-            Button("New w/ CSP", (4*BUTTON_SIZE+50, 680), "GENERATE_START_STATE", (0, 0, 102)),
+            Button("New w/ BT", (3*BUTTON_SIZE+40, 560), "GENERATE_START_STATE", (0, 0, 102)),
+            Button("New w/ MIN", (5*BUTTON_SIZE+60, 560), "GENERATE_MIN_CONFLICT", (0, 0, 102)),
+
             
         ]
     def draw_grid(self, state, position=(0, 0)):
@@ -1247,7 +1086,7 @@ class PuzzleUI:
     def handle_click(self, pos):
         for btn in self.buttons:
             if btn.rect.collidepoint(pos):
-                if btn.text == "New w/ CSP":
+                if btn.text == "New w/ BT":
                     self.start_state = generate_start_state_by_csp()
                     self.end_state = self.start_state
                     self.path = None
@@ -1255,6 +1094,22 @@ class PuzzleUI:
                     self.steps_display = None
                     self.time_display = None
                     print(f"New start state: {self.start_state}")
+                elif btn.text == "New w/ MIN":
+                    self.start_state = generate_start_state_by_min_conflict()
+                    self.end_state = self.start_state
+                    self.path = None
+                    self.current_step = 0
+                    self.steps_display = None
+                    self.time_display = None
+                    print(f"New start state: {self.start_state}")
+                elif btn.text == "New w/ FC":
+                    self.start_state = generate_start_state_with_forward_checking()
+                    self.end_state = self.start_state
+                    self.path = None
+                    self.current_step = 0
+                    self.steps_display = None
+                    self.time_display = None
+                    print(f"New FC start state: {self.start_state}")
                 else:
                     self.end_state = self.start_state
                     self.path = None
@@ -1328,14 +1183,98 @@ class PuzzleUI:
 #endregion
 
 #region [Các hàm tiện ích]
-def is_solvable(state_flat):
-    inversion_count = 0
-    for i in range(len(state_flat)):
-        for j in range(i + 1, len(state_flat)):
-            if state_flat[i] != 0 and state_flat[j] != 0 and state_flat[i] > state_flat[j]:
-                inversion_count += 1
-    return inversion_count % 2 == 0
+def is_solvable(assignment):
+    """Check if the 8-puzzle assignment is solvable."""
+    if len(assignment) != 9:
+        return False
+    
+    # Ensure all tiles 0 to 8 appear exactly once
+    if sorted(assignment) != list(range(9)):
+        return False
+    
+    # Count inversions (excluding the blank tile 0)
+    inversions = 0
+    tiles = [x for x in assignment if x != 0]  # Exclude blank
+    for i in range(len(tiles)):
+        for j in range(i + 1, len(tiles)):
+            if tiles[i] > tiles[j]:
+                inversions += 1
+    
+    # Solvable if inversions is even (for goal state with 0 inversions)
+    return inversions % 2 == 0
 
+def generate_start_state_with_forward_checking():
+    def backtrack(assignment, domains):
+        if len(assignment) == 9:
+            # Check if the state is valid and solvable
+            if is_solvable(assignment):
+                return assignment
+            return None
+        
+        # Choose the next unassigned variable (position)
+        var = len(assignment)
+        
+        # Shuffle values to ensure randomness
+        values = domains[var].copy()
+        random.shuffle(values)
+        
+        for value in values:
+            # Skip if value is already used
+            if value in assignment:
+                continue
+
+            # Temporarily assign the value
+            new_assignment = assignment + [value]
+
+            # Forward checking: remove the assigned value from remaining domains
+            new_domains = [d.copy() for d in domains]
+            for d in new_domains[var + 1:]:
+                if value in d:
+                    d.remove(value)
+
+            # Continue if no domain is empty
+            if all(len(d) > 0 for d in new_domains[var + 1:]):
+                result = backtrack(new_assignment, new_domains)
+                if result:
+                    return result
+        return None
+
+    # Initialize domains: 0 to 8 for each position
+    initial_domains = [list(range(9)) for _ in range(9)]
+    
+    # Generate a state with exactly 9 tiles (0 to 8)
+    result = backtrack([], initial_domains)
+    
+    if result:
+        # Convert to 3x3 grid as tuple of tuples
+        grid = tuple(tuple(result[i:i + 3]) for i in range(0, 9, 3))
+        print("Generated 8-puzzle start state:", grid)
+        return grid
+    else:
+        # Fallback to a simple solvable state
+        fallback = ((1, 2, 3), (4, 5, 6), (7, 0, 8))
+        print("Using fallback state:", fallback)
+        return fallback
+    
+def generate_start_state_by_min_conflict(max_steps=1000):
+    current = list(range(9))
+    random.shuffle(current)
+    
+    def conflicts(state):
+        """Tính số ô không ở đúng vị trí"""
+        return sum(1 for i, val in enumerate(state) if val != 0 and val != goal_state[i // 3][i % 3])
+    
+    for step in range(max_steps):
+        if is_solvable(current):
+            if conflicts(current) <= 2:
+                break
+        # Chọn 2 ô bất kỳ để swap giảm xung đột
+        idx1, idx2 = random.sample(range(9), 2)
+        current[idx1], current[idx2] = current[idx2], current[idx1]
+
+    grid = [tuple(current[i:i+3]) for i in range(0, 9, 3)]
+    print(f"Min-conflict state after {step+1} steps: {grid}")
+    return tuple(grid)
 
 def generate_start_state_by_csp():
     from itertools import permutations
