@@ -773,3 +773,146 @@ Thuật toán CSP (Problem Satisfaction Problem) tìm kiếm giải pháp cho b�
     Nhược điểm:
     Có thể gặp phải backtracking sâu, dẫn đến thời gian chạy lâu đối với các không gian trạng thái lớn.
     Thuật toán có thể bị lặp vô hạn trong các bài toán không có giải pháp hoặc không có chiến lược chọn biến tốt (ví dụ: chọn các ô một cách ngẫu nhiên).
+
+Thuật toán CSP – Forward Checking
+
+![image](https://github.com/user-attachments/assets/874cdeb1-9247-4225-b58c-02345fd6a28b)
+
+Forward Checking là một kỹ thuật cải tiến của backtracking giúp tránh việc quay lui không cần thiết bằng cách loại bỏ các giá trị không hợp lệ khỏi miền giá trị của các biến chưa gán. Khi một biến được gán giá trị, thuật toán sẽ kiểm tra trước (forward) các biến còn lại và cập nhật miền giá trị của chúng dựa trên các ràng buộc.
+
+    Hoạt động của thuật toán CSP – Forward Checking
+    Khởi tạo
+    Khởi tạo trạng thái ban đầu của ma trận 3x3 với tất cả các ô chưa gán giá trị. Miền giá trị ban đầu của mỗi biến là {0, 1, 2, ..., 8}.
+    
+    Lặp lại
+    • Chọn một biến: Chọn một ô chưa gán giá trị. Có thể chọn theo thứ tự tuyến tính hoặc sử dụng chiến lược chọn biến tối ưu (như MRV – Minimum Remaining Values).
+    • Gán giá trị: Thử gán một giá trị từ miền giá trị vào ô đó.
+    • Kiểm tra ràng buộc:
+     – Kiểm tra xem giá trị vừa gán có trùng với các giá trị đã được gán trước đó không.
+     – Cập nhật miền giá trị của các biến chưa gán bằng cách loại bỏ giá trị vừa gán.
+     – Nếu một biến nào đó còn lại có miền rỗng → quay lui (backtrack).
+    • Tiếp tục gán biến khác nếu không vi phạm ràng buộc.
+    • Kiểm tra mục tiêu: Khi tất cả các biến đã được gán và không còn ràng buộc bị vi phạm, trạng thái hợp lệ được tạo ra.
+    
+    Kết thúc
+    Thuật toán dừng khi tìm được trạng thái hợp lệ ban đầu (gồm 9 ô với các giá trị duy nhất từ 0 đến 8).
+    
+    Solution
+    Trả về một trạng thái 8-puzzle hợp lệ với đầy đủ giá trị và không trùng lặp, có thể tiếp tục dùng làm đầu vào cho thuật toán giải puzzle.
+    
+    Hiệu suất
+    Ưu điểm:
+    
+    Giảm thiểu số bước quay lui nhờ loại bỏ sớm các giá trị không hợp lệ.
+    
+    Phù hợp với bài toán 8-puzzle có miền nhỏ và ràng buộc đơn giản (giá trị duy nhất).
+    
+    Nhược điểm:
+    
+    Tốn tài nguyên để liên tục cập nhật và theo dõi miền giá trị của các biến.
+    
+    Không tối ưu nếu không kết hợp với chiến lược chọn biến tốt (MRV, Degree heuristic,…).
+
+
+Thuật toán CSP – Min-Conflicts
+![image](https://github.com/user-attachments/assets/21eef342-e5b2-4ba7-a43f-b6790131460f)
+
+Min-Conflicts là một thuật toán heuristic được sử dụng để giải bài toán CSP bằng cách bắt đầu với một trạng thái ban đầu ngẫu nhiên và liên tục sửa đổi nó bằng cách giảm số lượng xung đột (conflicts) – tức là các ràng buộc bị vi phạm – cho đến khi không còn xung đột nào.
+
+    Hoạt động của thuật toán CSP – Min-Conflicts
+    Khởi tạo
+    Bắt đầu với một trạng thái ban đầu ngẫu nhiên, có thể có các giá trị trùng nhau (ví dụ: hai ô cùng chứa số 5).
+    
+    Lặp lại
+    • Kiểm tra ràng buộc: Xác định các biến (ô) đang vi phạm ràng buộc (ví dụ: có giá trị trùng).
+    • Chọn biến xung đột: Chọn một biến đang vi phạm ràng buộc (ví dụ: một ô có giá trị trùng với ô khác).
+    • Tìm giá trị gây ít xung đột nhất: Gán cho biến một giá trị khác trong miền sao cho số lượng xung đột giảm thiểu. Nếu có nhiều giá trị ngang nhau về xung đột, chọn ngẫu nhiên.
+    • Lặp lại cho đến khi:
+     – Tất cả các ô đều có giá trị duy nhất (không còn xung đột).
+     – Hoặc đạt đến số lần lặp tối đa (kết thúc thất bại).
+    
+    Kết thúc
+    Trả về một trạng thái hợp lệ của 8-puzzle nếu tìm được, hoặc báo lỗi nếu không thể sửa hết xung đột sau số lần lặp cho phép.
+    
+    Solution
+    Một cấu hình ma trận 3x3 trong đó mỗi giá trị từ 0 đến 8 xuất hiện đúng một lần, có thể dùng làm trạng thái đầu để giải bài toán.
+    
+    Hiệu suất
+    Ưu điểm:
+    
+    Hiệu quả cao trong việc tìm lời giải nhanh khi số lượng ràng buộc không quá phức tạp.
+    
+    Dễ cài đặt, đặc biệt trong tạo trạng thái đầu hợp lệ.
+    
+    Nhược điểm:
+    
+    Không đảm bảo tìm được lời giải nếu trạng thái ban đầu có quá nhiều xung đột.
+    
+    Có thể rơi vào trạng thái cục bộ (local minima) và lặp lại không hiệu quả.
+1. No Observation (Không quan sát):
+
+Lý do không áp dụng: Trong bài toán 8-Puzzle, người chơi luôn có thể quan sát toàn bộ trạng thái của ma trận. Mỗi ô trong ma trận có thể được nhìn thấy, và vì vậy, không có môi trường No Observation trong bài toán này. Người chơi hoặc thuật toán luôn có đủ thông tin về trạng thái của game để ra quyết định. Nếu không có khả năng quan sát, người chơi sẽ không thể thực hiện bất kỳ hành động nào có ý nghĩa trong game.
+
+2. Nondeterministic (Không xác định):
+
+Lý do không áp dụng: Trong 8-Puzzle, mỗi hành động đều dẫn đến một kết quả xác định. Khi bạn di chuyển ô trống theo một hướng (trái, phải, lên, xuống), kết quả luôn là một trạng thái cụ thể và không có sự ngẫu nhiên. Do đó, 8-Puzzle là một môi trường deterministic (xác định), nơi mỗi hành động có một kết quả duy nhất. Nếu có yếu tố ngẫu nhiên trong các hành động (ví dụ, kết quả di chuyển ô trống không xác định), thì bài toán sẽ trở thành môi trường Nondeterministic, nhưng điều này không phải là đặc điểm của bài toán 8-Puzzle truyền thống.
+
+Partial Observation
+![po](https://github.com/user-attachments/assets/fa0dbff4-f1d7-416b-b978-7be47e2ba838)
+
+
+Định nghĩa:
+Partial Observation là môi trường trong đó agent chỉ có thể quan sát một phần của trạng thái môi trường thay vì toàn bộ trạng thái. Điều này tạo ra sự không chắc chắn vì agent phải đưa ra quyết định dựa trên thông tin không đầy đủ. Điều này có thể làm cho việc tìm kiếm giải pháp trở nên khó khăn hơn và đòi hỏi các chiến lược khác nhau để xử lý thiếu sót thông tin.
+
+    Các thành phần của bài toán 8-Puzzle:
+    
+    Trạng thái ban đầu (Initial State): Ma trận 3x3 của 8-Puzzle, trong đó có 8 số và một ô trống (0). Trạng thái ban đầu có thể được tạo ngẫu nhiên hoặc từ một trạng thái đã cho sẵn.
+    
+    Tập hành động (Actions): Di chuyển ô trống theo bốn hướng: trái, phải, lên, xuống. Mỗi hành động sẽ tạo ra một trạng thái mới.
+    
+    Hàm chuyển trạng thái (Transition Model): Hoán đổi vị trí của ô trống với ô kề (lên, xuống, trái, phải), tạo ra trạng thái con.
+    
+    Kiểm tra mục tiêu (Goal Test): So sánh trạng thái hiện tại với trạng thái đích (1-2-3 | 4-5-6 | 7-8-0).
+    
+    Hàm chi phí / Hàm đánh giá: Thường sử dụng các hàm heuristic như Manhattan Distance để đánh giá mức độ gần với trạng thái đích.
+    
+    Hoạt động của Partial Observation trong 8-Puzzle:
+    
+    Khởi tạo:
+    
+    Tạo một trạng thái ban đầu cho bài toán, có thể là một trạng thái ngẫu nhiên hoặc đã cho.
+    
+    Lưu trữ thông tin về các ô có thể quan sát được trong trạng thái.
+    
+    Lặp lại:
+    
+    Agent chỉ quan sát một phần của trạng thái ma trận (ví dụ, một số ô trong ma trận 3x3).
+    
+    Dựa trên phần quan sát này, agent đưa ra hành động di chuyển (trái, phải, lên, xuống).
+    
+    Sau khi thực hiện hành động, trạng thái mới được cập nhật và agent sẽ tiếp tục với quan sát mới.
+    
+    Nếu trạng thái quan sát đủ thông tin để xác định trạng thái đích, thuật toán dừng lại và trả về lời giải.
+    
+    Kết thúc:
+    
+    Thuật toán dừng khi trạng thái quan sát đủ thông tin để đạt được trạng thái đích hoặc không còn hành động hợp lệ.
+    
+    Solution:
+    Trả về chuỗi hành động dẫn từ trạng thái ban đầu đến trạng thái đích. Vì có phần quan sát hạn chế, chính sách tối ưu có thể không được tìm thấy nếu thông tin không đủ để đánh giá đúng các hành động.
+    
+    Hiệu suất:
+    
+    Ưu điểm:
+    
+    Giảm thiểu bộ nhớ: Chỉ cần lưu trữ và tính toán phần trạng thái có thể quan sát, thay vì lưu trữ toàn bộ không gian trạng thái.
+    
+    Tối ưu hóa tốc độ: Việc chỉ làm việc với một phần của trạng thái giúp giảm bớt khối lượng tính toán.
+    
+    Nhược điểm:
+    
+    Không đảm bảo tối ưu: Vì chỉ có thông tin hạn chế, agent có thể đưa ra quyết định sai nếu phần quan sát không đủ.
+    
+    Khó khăn trong việc khám phá môi trường: Nếu phần quan sát không bao quát đủ không gian trạng thái, agent có thể không tìm ra giải pháp tốt nhất.
+    
+    Phụ thuộc vào chiến lược quan sát: Nếu cách chọn các ô quan sát không hợp lý, việc tìm kiếm giải pháp có thể không hiệu quả.
