@@ -80,7 +80,7 @@ IDA* tận dụng bộ nhớ thấp của DFS và sức mạnh định hướng 
 
 
 Greedy Search
-    ![Gready](https://github.com/user-attachments/assets/2edf4f5c-219b-47b3-af8f-671335c90f0a)
+![GREEDY](https://github.com/user-attachments/assets/2e4830a7-fbd0-4199-a0bb-3f45a1399177)
 
 Thuật toán Greedy Search là một chiến lược tìm kiếm dựa hoàn toàn vào hàm heuristic h(n) để định hướng. Tại mỗi bước, chỉ mở rộng nút có giá trị heuristic nhỏ nhất (ước lượng gần đích nhất), mà bỏ qua chi phí đã đi (g(n)).
 
