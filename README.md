@@ -1,4 +1,4 @@
-# AI_personal_project
+![STOCH](https://github.com/user-attachments/assets/2cc4eff9-d9c4-4fe3-adac-26025e274fda)# AI_personal_project
 1. Mục tiêu
 
   Mục tiêu của chương trình là xây dựng một hệ thống giải bài toán 8-Puzzle bằng cách áp dụng nhiều nhóm thuật toán khác nhau trong lĩnh vực Trí Tuệ Nhân Tạo. Việc này nhằm so sánh hiệu quả giữa các thuật toán, hiểu rõ đặc điểm, ưu nhược điểm của từng phương pháp trong việc giải quyết bài toán tìm kiếm, từ đó nâng cao khả năng chọn lựa giải pháp phù hợp cho các vấn đề tương tự trong thực tế.
@@ -21,7 +21,8 @@ Chương trình được tổ chức thành nhiều nhóm thuật toán dựa th
 2.1. Các thuật toán tìm kiếm có thông tin (Informed Search)
 
 IDA* – Iterative Deepening A*
-![IDA](https://github.com/user-attachments/assets/f540281c-17c7-4aa0-bf0d-f1182f02ff3c)
+
+![IDA](https://github.com/user-attachments/assets/33497721-e59e-4fb4-88d1-3dfdf4137e66)
 
 Thuật toán IDA* kết hợp hai thuật toán:
 
@@ -186,7 +187,7 @@ Thuật toán Greedy Search là một chiến lược tìm kiếm dựa hoàn to
     Phụ thuộc mạnh vào chất lượng heuristic.
 
 A* – A Star Search Algorithm
-    ![A](https://github.com/user-attachments/assets/4fe45389-afc1-481b-b7b6-d45018ff7274)
+![A](https://github.com/user-attachments/assets/9d08bf09-689f-4afb-b8d0-b46bf7cc4d7b)
 
 Thuật toán A* kết hợp hai yếu tố quan trọng:
 
@@ -255,7 +256,9 @@ Tìm kiếm theo chi phí tối ưu: Xem xét tổng chi phí ước lượng đ
 2.2 Các thuật toán tìm kiếm không có thông tin
 
 BFS
-![bfs](https://github.com/user-attachments/assets/ea3a408d-5e41-41c3-9bff-a147eb8d53ea)
+![BFS](https://github.com/user-attachments/assets/98b88746-7265-4cc9-ba31-72a224e97a00)
+
+
   Thuật toán Breadth-First Search (BFS) là một trong những phương pháp tìm kiếm không sử dụng thông tin bổ sung về trạng thái đích. BFS hoạt động theo nguyên lý mở rộng tất cả các trạng thái ở mức hiện tại trước khi chuyển sang mức tiếp theo, đảm bảo tìm ra lời giải có số bước ít nhất. 
   
     Các thành phần của bài toán tìm kiếm trong 8-Puzzle
@@ -287,7 +290,7 @@ BFS
     Không hiệu quả với các bài toán mở rộng như 15-Puzzle.
     Không tận dụng bất kỳ thông tin nào về mục tiêu (không có heuristic).
 DFS
-![DFS](https://github.com/user-attachments/assets/6f9d8922-9cbc-4d13-a732-1e31ba4b3455)
+![DFS](https://github.com/user-attachments/assets/9d8a345d-ad93-44f3-ae13-6989a1cfe8e3)
 
 Thuật toán Depth-First Search (DFS) là một phương pháp tìm kiếm không sử dụng thông tin bổ sung về trạng thái đích. DFS hoạt động theo nguyên lý đi sâu vào nhánh con đầu tiên cho đến khi không thể đi tiếp (chạm nút lá hoặc gặp trạng thái đã duyệt), sau đó mới quay lui để tiếp tục nhánh kế tiếp. DFS không đảm bảo tìm ra lời giải tối ưu về số bước, nhưng có thể tiết kiệm bộ nhớ hơn so với BFS.
 
@@ -342,7 +345,7 @@ Thuật toán Depth-First Search (DFS) là một phương pháp tìm kiếm khô
     Không hiệu quả nếu lời giải nằm ở mức rất nông nhưng DFS lại đi lạc quá sâu ở nhánh sai.
 
 UCS – Uniform Cost Search
-![UCS](https://github.com/user-attachments/assets/534b8869-ce2b-4793-ac23-4c6deeeb8523)
+![UCS](https://github.com/user-attachments/assets/b508b870-9a41-4130-a6cf-6eb2a3b20424)
 
   Thuật toán Uniform Cost Search (UCS) là một thuật toán tìm kiếm không có thông tin (uninformed search) nhưng có xét đến chi phí của đường đi. UCS mở rộng các trạng thái theo tổng chi phí đường đi thấp nhất từ trạng thái ban đầu đến trạng thái hiện tại. UCS sử dụng một hàng đợi ưu tiên (priority queue), đảm bảo tìm được lời giải tối ưu về tổng chi phí, không chỉ về số bước.
 
@@ -399,7 +402,7 @@ UCS – Uniform Cost Search
     Nếu tất cả chi phí đều bằng nhau thì hiệu suất kém hơn BFS vì tốn công duy trì hàng đợi ưu tiên.
     
 Iterative Deepening Depth-First Search (IDDFS)
-![IDDFS](https://github.com/user-attachments/assets/49b7d614-dde0-42a2-9f81-44f28c92956a)
+![IDDFS](https://github.com/user-attachments/assets/f6196b11-a519-402b-a903-068309cb3fa9)
 
 Iterative Deepening Depth-First Search (IDDFS) là một kỹ thuật kết hợp giữa DFS (Depth-First Search) và BFS (Breadth-First Search) nhằm khai thác ưu điểm của cả hai: bộ nhớ tiết kiệm như DFS nhưng vẫn đảm bảo tìm được lời giải tối ưu như BFS. IDDFS đặc biệt phù hợp với các bài toán tìm kiếm có không gian trạng thái rộng nhưng độ sâu lời giải không quá lớn, ví dụ như bài toán 8-Puzzle.
 
@@ -451,7 +454,7 @@ Iterative Deepening Depth-First Search (IDDFS) là một kỹ thuật kết hợ
 2.3 Các thuật toán local search
 
 Stochastic Hill Climbing – Leo đồi ngẫu nhiên
-![stoch_1](https://github.com/user-attachments/assets/a971a7d7-365f-48d7-8445-f9878b0e1de3)
+![STOCH](https://github.com/user-attachments/assets/093a1f10-2965-42b6-8339-893a10c1826c)
 
 Thuật toán Stochastic Hill Climbing là một biến thể của Hill Climbing, thuộc nhóm tìm kiếm cục bộ (local search), hoạt động bằng cách: Lựa chọn ngẫu nhiên một trong số các hàng xóm tốt hơn thay vì luôn chọn hàng xóm tốt nhất.
 
@@ -507,7 +510,7 @@ Thuật toán Stochastic Hill Climbing là một biến thể của Hill Climbin
     Không đảm bảo tìm thấy đích, đặc biệt nếu không cho phép quay lại hoặc restart.
 
 Steepest-Ascent Hill Climbing – Leo đồi dốc nhất
-![steep](https://github.com/user-attachments/assets/cfa0168e-978d-4f91-9726-dd093885c64d)
+![STEEPH](https://github.com/user-attachments/assets/3234c695-bc04-4a7b-8003-cae49f18b614)
 
 Steepest-Ascent Hill Climbing là một thuật toán tìm kiếm cục bộ (local search) chọn hàng xóm tốt nhất tại mỗi bước. Đây là biến thể “tham lam nhất” của Hill Climbing, vì luôn chọn bước đi có cải thiện lớn nhất theo hàm đánh giá.
 
@@ -566,7 +569,7 @@ Steepest-Ascent Hill Climbing là một thuật toán tìm kiếm cục bộ (lo
 
 
 Simple Hill Climbing – Leo đồi đơn giản
-![image](https://github.com/user-attachments/assets/72b1d49b-f18d-44e3-b6e1-a30d237cc5a8)
+![image](https://github.com/user-attachments/assets/65f5b7cd-0b16-45de-be06-43e10b7c518d)
 
 Simple Hill Climbing là dạng cơ bản nhất của thuật toán Hill Climbing, thuộc nhóm tìm kiếm cục bộ. Thuật toán này chỉ xét một hàng xóm tại một thời điểm (thường theo thứ tự), và chấp nhận ngay nếu nó tốt hơn, thay vì tìm hàng xóm tốt nhất như Steepest-Ascent.
 
@@ -620,7 +623,7 @@ Simple Hill Climbing là dạng cơ bản nhất của thuật toán Hill Climbi
 
 
 Simulated Annealing (SA) – Leo đồi có làm nguội
-![image](https://github.com/user-attachments/assets/8e2eb117-84dd-4a4e-bf53-1dc017ce4fc0)
+![image](https://github.com/user-attachments/assets/0dca6c30-9095-4fba-983d-90477bd0fdc6)
 
 
 Simulated Annealing (SA) là một thuật toán tìm kiếm cục bộ lấy cảm hứng từ quá trình ủ nhiệt trong luyện kim.
@@ -677,7 +680,7 @@ Khác với các thuật toán Hill Climbing khác, SA cho phép thỉnh thoản
     Dễ bị kém ổn định nếu hàm đánh giá không trơn tru.
 
 Q-Learning – Học tăng cường không mô hình
-![Qlearn](https://github.com/user-attachments/assets/1e1412e0-adba-42af-90ed-0569d8287d4f)
+![QLEARN](https://github.com/user-attachments/assets/c1afe1bf-7555-4a87-853f-8e69fe292087)
 
 Q-Learning là một thuật toán học tăng cường (Reinforcement Learning) giúp agent học chính sách tối ưu thông qua trải nghiệm, mà không cần biết trước mô hình môi trường (tức là không cần biết chính xác các xác suất chuyển trạng thái). Thay vì tìm kiếm đơn thuần như A* hay Hill Climbing, Q-Learning học dần giá trị của các hành động thông qua thử nghiệm và cập nhật.
     
@@ -731,8 +734,7 @@ Q-Learning là một thuật toán học tăng cường (Reinforcement Learning)
     Việc khám phá–khai thác (ϵ-greedy) cần điều chỉnh cẩn thận.
 
 CSP – Backtracking – Tìm kiếm giải pháp theo ràng buộc
-    ![csp](https://github.com/user-attachments/assets/b43b10d1-aa3f-4137-987a-d3659cba3e7a)
-
+![image](https://github.com/user-attachments/assets/c5dc5b48-0de0-49e7-8f7a-a74c7ec809f0)
 
 Thuật toán CSP (Problem Satisfaction Problem) tìm kiếm giải pháp cho bài toán bằng cách sử dụng các ràng buộc và backtracking (quay lui). Trong CSP, ta có một tập các biến, mỗi biến có một miền giá trị có thể có, và mục tiêu là tìm một cách gán giá trị cho các biến sao cho tất cả các ràng buộc giữa các biến đều được thỏa mãn.
     
