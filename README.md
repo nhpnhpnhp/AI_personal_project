@@ -678,62 +678,14 @@ Khác với các thuật toán Hill Climbing khác, SA cho phép thỉnh thoản
 ![image](https://github.com/user-attachments/assets/334d700a-22d9-4cc6-867e-b72bf9b8101d)
 
 
+2.44 Các thuật toán tìm kiếm Học tăng cường
 
 Q-Learning – Học tăng cường không mô hình
 ![QLEARN](https://github.com/user-attachments/assets/c1afe1bf-7555-4a87-853f-8e69fe292087)
 
-Q-Learning là một thuật toán học tăng cường (Reinforcement Learning) giúp agent học chính sách tối ưu thông qua trải nghiệm, mà không cần biết trước mô hình môi trường (tức là không cần biết chính xác các xác suất chuyển trạng thái). Thay vì tìm kiếm đơn thuần như A* hay Hill Climbing, Q-Learning học dần giá trị của các hành động thông qua thử nghiệm và cập nhật.
-    
-    Các thành phần trong bài toán 8-Puzzle
-    Trạng thái (State):
-    Ma trận 3x3 hiện tại của ô số.
-    
-    Hành động (Action):
-    Di chuyển ô trống theo trái, phải, lên, xuống.
-    
-    Hàm phần thưởng (Reward):
-    • Thường:
-    −1 mỗi bước di chuyển → khuyến khích tìm đường ngắn nhất.
-    +100 khi đạt trạng thái đích.
-    
-    Q-Table:
-    Bảng lưu 
-    Q(s,a) = giá trị kỳ vọng của việc thực hiện hành động a tại trạng thái s.
-    
-    Hoạt động của thuật toán Q-Learning
-    Khởi tạo
-    
-    Q-table: tất cả giá trị ban đầu = 0.
-    Chọn tham số: tốc độ học α, hệ số chiết khấu γ, chiến lược chọn hành động (ví dụ: ϵ-greedy).
-    
-    Lặp lại cho mỗi episode
-    • Chọn trạng thái ban đầu.
-    • Trong mỗi bước:
-     – Chọn hành động a dựa trên Q(s,a) (ϵ-greedy: chủ yếu chọn tốt nhất, đôi khi chọn ngẫu nhiên để khám phá).
-     – Thực hiện a, nhận trạng thái mới s′và phần thưởng r.
-     – Cập nhật Q-value:    Q(s,a)←Q(s,a)+α[r+γmax)−Q(s,a)]
-     – Cập nhật trạng thái s=s′
-    
-    • Nếu đạt mục tiêu hoặc hết bước → kết thúc episode.
-    
-    Sau nhiều episode
-    Q-table hội tụ gần chính sách tối ưu. Có thể dùng để tìm đường đi tốt nhất từ bất kỳ trạng thái nào.
-    
-    Solution
-    Trả về chính sách tối ưu (tập hành động tốt nhất tại mỗi trạng thái) hoặc một chuỗi hành động cụ thể từ trạng thái ban đầu đến đích.
-    
-    Hiệu suất
-    Ưu điểm:
-    Không cần biết trước mô hình môi trường.
-    Có thể áp dụng cho bài toán không gian lớn (với các biến thể như Deep Q-Network – DQN).
-    Học được chính sách tối ưu thông qua trải nghiệm.
-    
-    Nhược điểm:
-    Với không gian trạng thái quá lớn (như 8-puzzle: 9! ≈ 362,880 trạng thái), Q-table trở nên cồng kềnh.
-    Cần nhiều episode để hội tụ.
-    Việc khám phá–khai thác (ϵ-greedy) cần điều chỉnh cẩn thận.
+Q-Learning là một thuật toán học tăng cường (Reinforcement Learning) giúp agent học chính sách tối ưu thông qua trải nghiệm, mà không cần biết trước mô hình môi trường (tứ5 Các thuật toán CSP
 
-CSP – Backtracking – Tìm kiếm giải pháp theo ràng buộc
+Backtracking – Tìm kiếm giải pháp theo ràng buộc
 ![image](https://github.com/user-attachments/assets/c5dc5b48-0de0-49e7-8f7a-a74c7ec809f0)
 
 Thuật toán CSP (Problem Satisfaction Problem) tìm kiếm giải pháp cho bài toán bằng cách sử dụng các ràng buộc và backtracking (quay lui). Trong CSP, ta có một tập các biến, mỗi biến có một miền giá trị có thể có, và mục tiêu là tìm một cách gán giá trị cho các biến sao cho tất cả các ràng buộc giữa các biến đều được thỏa mãn.
@@ -849,6 +801,9 @@ Min-Conflicts là một thuật toán heuristic được sử dụng để giả
     Không đảm bảo tìm được lời giải nếu trạng thái ban đầu có quá nhiều xung đột.
     
     Có thể rơi vào trạng thái cục bộ (local minima) và lặp lại không hiệu quả.
+
+2.6 Các thuật toán tìm kiếm môi trường phức tạp
+
 1. No Observation (Không quan sát):
 
 Lý do không áp dụng: Trong bài toán 8-Puzzle, người chơi luôn có thể quan sát toàn bộ trạng thái của ma trận. Mỗi ô trong ma trận có thể được nhìn thấy, và vì vậy, không có môi trường No Observation trong bài toán này. Người chơi hoặc thuật toán luôn có đủ thông tin về trạng thái của game để ra quyết định. Nếu không có khả năng quan sát, người chơi sẽ không thể thực hiện bất kỳ hành động nào có ý nghĩa trong game.
