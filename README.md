@@ -683,7 +683,43 @@ Khác với các thuật toán Hill Climbing khác, SA cho phép thỉnh thoản
 Q-Learning – Học tăng cường không mô hình
 ![QLEARN](https://github.com/user-attachments/assets/c1afe1bf-7555-4a87-853f-8e69fe292087)
 
-Q-Learning là một thuật toán học tăng cường (Reinforcement Learning) giúp agent học chính sách tối ưu thông qua trải nghiệm, mà không cần biết trước mô hình môi trường (tứ5 Các thuật toán CSP
+Q-Learning là một thuật toán học tăng cường (Reinforcement Learning) không có mô hình (model-free), giúp tác nhân học được chính sách tối ưu để đạt mục tiêu thông qua thử và sai. Không giống như BFS, Q-Learning sử dụng thông tin từ quá trình tương tác với môi trường để học dần chính sách tốt mà không cần duyệt toàn bộ không gian trạng thái.
+
+    Các thành phần của bài toán tìm kiếm trong 8-Puzzle (áp dụng cho Q-Learning)
+    Trạng thái (State): Tương tự như BFS, mỗi trạng thái là một mảng 3x3 đại diện cho vị trí của 8 ô số và một ô trống (0).
+    Tập hành động (Actions): Tại mỗi trạng thái, ô trống có thể di chuyển theo 4 hướng: trái, phải, lên, xuống (nếu hợp lệ).
+    Hàm chuyển trạng thái (Transition Model): Một hành động sẽ tạo ra một trạng thái mới bằng cách hoán đổi ô trống với ô liền kề.
+    Hàm thưởng (Reward Function):
+    Thường đặt phần thưởng là -1 cho mỗi bước đi, để khuyến khích đường đi ngắn nhất.
+    Phần thưởng lớn (ví dụ: +100) nếu đạt được trạng thái đích.
+    Mục tiêu là tối đa hóa tổng phần thưởng tích lũy.
+    Trạng thái mục tiêu (Goal State): Trạng thái đích chuẩn của 8-Puzzle
+    Hoạt động của thuật toán Q-Learning
+    1.	Khởi tạo:
+    Bảng Q: Lưu giá trị Q cho mỗi cặp (trạng thái, hành động), ban đầu gán bằng 0.
+    Tham số: alpha (tốc độ học), gamma (hệ số chiết khấu), epsilon (xác suất chọn hành động ngẫu nhiên để khám phá).
+    2.	Lặp lại nhiều tập (episodes):
+    Đặt trạng thái hiện tại là trạng thái khởi đầu.
+    Lặp lại cho đến khi đạt trạng thái mục tiêu:
+    Chọn hành động:
+    Với xác suất epsilon, chọn hành động ngẫu nhiên (khám phá).
+    Ngược lại, chọn hành động có Q-value cao nhất (khai thác).
+    Thực hiện hành động → nhận trạng thái mới và phần thưởng.
+    Cập nhật giá trị Q bằng công thức: 
+    Q(s, a) ← Q(s, a) + α * [r + γ * max Q(s’, a’) − Q(s, a)]
+    Cập nhật trạng thái hiện tại.
+    3.	Lặp lại quá trình học cho đến khi giá trị Q hội tụ.
+    Solution: Sau khi học xong, tác nhân có thể sử dụng bảng Q để tìm lời giải bằng cách bắt đầu từ trạng thái đầu, tại mỗi bước chọn hành động có giá trị Q cao nhất cho đến khi đạt trạng thái đích.
+    Hiệu suất:
+    Ưu điểm:
+    Có khả năng học từ tương tác mà không cần duyệt toàn bộ không gian trạng thái.
+    Có thể áp dụng cho bài toán lớn hơn (như 15-Puzzle) nếu kết hợp với approximation (deep Q-learning).
+    Có thể tối ưu theo nhiều mục tiêu khác nhau nhờ hàm thưởng linh hoạt.
+    Nhược điểm:
+    Cần rất nhiều tập luyện để học hiệu quả.
+    Nếu không dùng kỹ thuật biểu diễn trạng thái hiệu quả, bảng Q rất lớn (vì số lượng trạng thái của 8-Puzzle là 9! = 362,880).
+    Không đảm bảo tìm được lời giải ngắn nhất trừ khi huấn luyện đủ lâu.
+
 
 Backtracking – Tìm kiếm giải pháp theo ràng buộc
 ![image](https://github.com/user-attachments/assets/c5dc5b48-0de0-49e7-8f7a-a74c7ec809f0)
